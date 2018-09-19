@@ -1,0 +1,28 @@
+// takes a render config as input
+// render config contains all the shaders and settings (maybe additional config with limits)
+// the program is linked on construction
+// configure method -- takes a renderconfig and sets the uniforms
+#pragma once
+
+#include "GL_utils.hpp"
+#include "RenderConfig.hpp"
+
+class DrawBuffer;
+
+class Renderer{
+public:
+	Renderer(const RenderConfig&, DrawBuffer&);
+	~Renderer(){};
+
+	void draw();
+
+private:
+	const RenderConfig& renderconfig;
+	DrawBuffer& drawbuffer;
+
+	GL::Program shader;
+	GL::VAO vao; // blank vao(needed for drawing)
+
+	void configure();
+	void set_uniform(const ShaderConfig::value_type& val, GL::Program& sh);
+};
