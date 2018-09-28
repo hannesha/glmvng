@@ -1,35 +1,18 @@
-/*
- *	Copyright (C) 2016  Hannes Haberl
- *
- *	This file is part of GLMViz.
- *
- *	GLMViz is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU General Public License as published by
- *	the Free Software Foundation, either version 3 of the License, or
- *	(at your option) any later version.
- *
- *	GLMViz is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU General Public License for more details.
- *
- *	You should have received a copy of the GNU General Public License
- *	along with GLMViz.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include "GL_utils.hpp"
-#include <stdexcept>
+#include <system_error>
 #include <string>
 #include <vector>
 #include <iostream>
 
 using namespace GL;
 
+std::error_code init_error = std::make_error_code(std::errc::protocol_error);
+
 Program::Program() {
 	id = glCreateProgram();
 
 	if(id == 0) {
-		throw std::runtime_error("Failed to create shader program!");
+		throw std::system_error(init_error, "Failed to create shader program!");
 	}
 }
 
@@ -53,8 +36,8 @@ void Program::check_link_status() {
 Shader::Shader(const char* code, GLuint type) {
 	id = glCreateShader(type);
 
-	if(id == 0) {
-		throw std::runtime_error("Failed to create shader!");
+	if(id == 0){
+		throw std::system_error(init_error, "Failed to create shader!");
 	}
 
 	glShaderSource(id, 1, &code, nullptr);
@@ -106,4 +89,15 @@ void GL::get_error(const char* str) {
 	}
 
 	std::cout << str << " :" << err_str << std::endl;
+}
+
+void GL::init() {
+#ifdef USE_GLEW
+	glewExperimental = GL_TRUE;
+	GLenum status = glewInit();
+
+	if(status != GLEW_OK){
+		throw std::system_error(init_error, "GLEW init failed");
+	}
+#endif
 }
