@@ -2,20 +2,11 @@
 #include <string>
 #include <stdexcept>
 
-
-#include "GL_utils.hpp"
-#include <GLFW/glfw3.h>
+#include "GLFW.hpp"
 
 #include "Config.hpp"
 #include "Drawbuffer.hpp"
 
-// glfw raii wrapper
-class GLFW {
-public:
-	GLFW() { if(!glfwInit()) throw std::runtime_error("GLFW init failed!"); };
-
-	~GLFW() { glfwTerminate(); };
-};
 
 int main() {
 	GLFW glfw;
@@ -25,6 +16,7 @@ int main() {
 	GLFWwindow* window = glfwCreateWindow(480, 320, "test", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
+	// load extensions
 	GL::init();
 
 	Config cfg("config");
