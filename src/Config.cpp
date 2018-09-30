@@ -5,6 +5,7 @@
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
+#include "Utils.hpp"
 
 const std::string CONFIG_FOLDER("/glmvng/");
 const std::string CONFIG_FILE("config");
@@ -34,6 +35,9 @@ Config::Config(const std::string& config_file){
 void Config::reload(){
 	try{
 		cfg.readFile(file.c_str());
+
+		// clear shader cache
+		shaders.clear();
 
 		// parse
 
@@ -71,14 +75,41 @@ void Config::reload(){
 //TODO generate renderconfig
 RenderConfig Config::parse_renderer(const std::string& path){
 	RenderConfig config;
+	std::string shader_path("shaders/");
 	//TODO parse base renderer settings
 	//TODO parse draw type, compute buf size ??
+
+	libconfig::Setting& cfg_shaders = cfg.lookup(path + ".shaders");
+	if(!cfg_shaders.isArray()){
+		throw std::invalid_argument("Expected shader name array at: " + path);
+	}
+
+	for(auto& s : cfg_shaders){
+		std::string shader_file = shader_path + (const char *)s;
+		auto shader_ptr = load_shader(shader_file);
+		config.shaders.push_back(shader_ptr);
+	}
 	
 		
 	ShaderConfig uniforms;
 	parse_uniforms(cfg.lookup(path), uniforms);
 	config.uniforms = uniforms;
 	return config;
+}
+
+std::shared_ptr<GL::Shader> Config::load_shader(const std::string& path){
+	auto shader = shaders.find(path);
+	if(shader != shaders.end()){
+		return shader->second;
+	}
+
+	// shader not found in map
+	auto shader_ptr = std::make_shared<GL::Shader>(
+		Utils::load_source(path).c_str(),
+		get_shader_type(path)
+	);
+	shaders.emplace(path, shader_ptr);
+	return shader_ptr;
 }
 
 Scalar Config::setting_to_scalar(libconfig::Setting& s) {

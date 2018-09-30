@@ -23,6 +23,7 @@ private:
 	GL::Program shader;
 	GL::VAO vao; // blank vao(needed for drawing)
 
+	void link_shaders(const RenderConfig::Shaders&);
 	void configure();
 	void set_uniform(const ShaderConfig::value_type& val, GL::Program& sh);
 };

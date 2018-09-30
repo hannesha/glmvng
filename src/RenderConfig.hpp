@@ -15,13 +15,15 @@
 using Shader_ptr = std::shared_ptr<GL::Shader>;
 
 struct RenderConfig{
+	using Shaders = std::vector<Shader_ptr>;
+
 	unsigned output_size;
 	GLenum drawtype;
 	// Shaderconfig
 	ShaderConfig uniforms;
 
 	//TODO use shader map instead and store the keys in that vector
-	std::vector<Shader_ptr> shaders;
+	Shaders shaders;
 	// use float ?
 	std::vector<double> transformation;
 };

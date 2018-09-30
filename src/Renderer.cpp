@@ -3,18 +3,20 @@
 
 Renderer::Renderer(const RenderConfig& renderconf, DrawBuffer& draw_buf): renderconfig(renderconf), drawbuffer(draw_buf)
 {
-//	shader.link_vector(renderconfig.shaders);
-	// link shader
-	for(auto sh : renderconfig.shaders){
+	link_shaders(renderconfig.shaders);
+
+	configure();
+}
+
+void Renderer::link_shaders(const RenderConfig::Shaders& shaders){
+	for(auto sh : shaders){
 		shader.attach(*sh);
 	}
 	glLinkProgram(shader.get_id());
-	for(auto sh : renderconfig.shaders){
+	for(auto sh : shaders){
 		shader.detach(*sh);
 	}
 	shader.check_link_status();
-
-	configure();
 }
 
 void Renderer::draw(){

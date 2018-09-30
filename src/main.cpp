@@ -5,9 +5,10 @@
 #include <sstream>
 #include "Scalar.hpp"
 #include <map>
-#include <libconfig.h++>
 #include <stdexcept>
 #include <GLFW/glfw3.h>
+
+#include "Config.hpp"
 
 using Shader_config = std::vector<std::pair<std::string, Scalar>>;
 
@@ -115,6 +116,8 @@ int main() {
 	GLFWwindow* window = glfwCreateWindow(480, 320, "test", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
+	GL::init();
+
 //	std::vector<GL::Shader> shs;
 //	Shader_source_map sh_sources;
 //	std::string filename = "vertex.glsl";
@@ -129,20 +132,7 @@ int main() {
 //	gl_shader.link_vector(shs);
 //	GL::get_error("test");
 
-	libconfig::Config cfg;
-
-	try {
-		cfg.readFile("config");
-	}
-	catch(const libconfig::FileIOException& fioex) {
-		std::cerr << "I/O error while reading file." << std::endl;
-		return 1;
-	}
-	catch(const libconfig::ParseException& pex) {
-		std::cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine()
-			<< " - " << pex.getError() << std::endl;
-		return 1;
-	}
+	Config cfg("config");
 
 
 	//Shader_config scalar_settings;
