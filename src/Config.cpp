@@ -92,7 +92,7 @@ RenderConfig Config::parse_renderer(const std::string& path){
 	
 		
 	ShaderConfig uniforms;
-	parse_uniforms(cfg.lookup(path), uniforms);
+	parse_uniforms(cfg.lookup(path + ".uniforms"), uniforms);
 	config.uniforms = uniforms;
 	return config;
 }
