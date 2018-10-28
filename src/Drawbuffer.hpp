@@ -11,7 +11,7 @@ public:
 	DrawBuffer();
 	~DrawBuffer();
 
-	void update(std::vector<Buffer<int16_t>>& );
+	void update(std::vector<Buffer<float>>& );
 //	void update_fft(const std::vector<FFT>& ffts);
 
 	struct TextureHandles{

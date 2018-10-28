@@ -6,19 +6,20 @@
 
 #include "GL_utils.hpp"
 #include "RenderConfig.hpp"
+#include <memory>
 
 class DrawBuffer;
 
 class Renderer{
 public:
-	Renderer(const RenderConfig&, DrawBuffer&);
+	Renderer(const RenderConfig&, std::shared_ptr<DrawBuffer>&);
 	~Renderer(){};
 
 	void draw();
 
 private:
 	const RenderConfig& renderconfig;
-	DrawBuffer& drawbuffer;
+	std::shared_ptr<DrawBuffer> drawbuffer;
 
 	GL::Program shader;
 	GL::VAO vao; // blank vao(needed for drawing)

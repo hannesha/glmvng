@@ -90,11 +90,39 @@ RenderConfig Config::parse_renderer(const std::string& path){
 		config.shaders.push_back(shader_ptr);
 	}
 	
+	config.output_size = cfg.lookup(path + ".output_size");
+	config.drawtype = parse_drawtype(cfg.lookup(path + ".drawtype"));
 		
 	ShaderConfig uniforms;
 	parse_uniforms(cfg.lookup(path + ".uniforms"), uniforms);
 	config.uniforms = uniforms;
 	return config;
+}
+
+bool Config::rfind(const std::string& input, const std::string& compare){
+	return input.rfind(compare) != std::string::npos;
+}
+
+GLenum Config::parse_drawtype(const char* name){
+	std::string str_name(name);
+	std::transform(str_name.begin(), str_name.end(), str_name.begin(), [](char c){ return std::tolower(c); });
+	if(rfind(str_name, "triangle strip")){
+		return GL_TRIANGLE_STRIP;
+	}
+	else if(rfind(str_name, "triangles")){
+		return GL_TRIANGLES;
+	}
+	else if(rfind(str_name, "line strip")){
+		return GL_LINE_STRIP;
+	}
+	else if(rfind(str_name, "lines")){
+		return GL_LINES;
+	}
+	else if(rfind(str_name, "points")){
+		return GL_POINTS;
+	}
+	
+	throw std::invalid_argument("unknown draw type");
 }
 
 std::shared_ptr<GL::Shader> Config::load_shader(const std::string& path){

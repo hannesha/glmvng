@@ -6,14 +6,18 @@
 
 #include "Config.hpp"
 #include "Drawbuffer.hpp"
+#include "Renderer.hpp"
+#include "Input.hpp"
+#include "Pulse_Async.hpp"
 
+#include <cmath>
 
 int main() {
 	GLFW glfw;
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	GLFWwindow* window = glfwCreateWindow(480, 320, "test", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(640, 480, "test", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
 	// load extensions
@@ -24,14 +28,43 @@ int main() {
 	// init buffers
 	// init audio stream
 
-	DrawBuffer draw_buf();
+	std::shared_ptr<DrawBuffer> draw_buf = std::make_shared<DrawBuffer>();
+	GL::get_error("create");
+	Renderer rend(cfg.renderers[0], draw_buf);
+	GL::get_error("create render");
 	// init fft
+	Buffers<float>::Ptr bufs(new Buffers<float>());
+	bufs->bufs.emplace_back(cfg.renderers[0].output_size);
 
+//	std::vector<float> test_data(100);
+//	for(int x = 0; x < 100; x++){
+//		test_data[x] = std::sin(static_cast<float>(x)/10);
+//	}
+//	bufs.bufs[0].write(test_data);
+//	draw_buf->update(bufs.bufs);
+	GL::get_error("update");
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 	// generate Renderers from config
-
-
+	Input::Ptr input(new Pulse_Async(bufs));
+	Module_Config::Input input_cfg;
+	input->start_stream(input_cfg);
 
 	// mainloop
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+	do{
+		draw_buf->update(bufs->bufs);
+
+
+		glClear(GL_COLOR_BUFFER_BIT);
+		rend.draw();
+
+		glfwPollEvents();
+		glfwSwapBuffers(window);
+	}
+	while(!glfwWindowShouldClose(window));
 
 	return 0;
 }

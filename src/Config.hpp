@@ -27,6 +27,8 @@ class Config {
 
 	private:
 		RenderConfig parse_renderer(const std::string&);
+		GLenum parse_drawtype(const char*);
+		static bool rfind(const std::string&, const std::string&);
 		void parse_uniforms(libconfig::Setting&, ShaderConfig&);
 		std::shared_ptr<GL::Shader> load_shader(const std::string& path);
 		

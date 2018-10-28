@@ -1,7 +1,7 @@
 #include "Renderer.hpp"
 #include "Drawbuffer.hpp"
 
-Renderer::Renderer(const RenderConfig& renderconf, DrawBuffer& draw_buf): renderconfig(renderconf), drawbuffer(draw_buf)
+Renderer::Renderer(const RenderConfig& renderconf, std::shared_ptr<DrawBuffer>& draw_buf): renderconfig(renderconf), drawbuffer(draw_buf)
 {
 	link_shaders(renderconfig.shaders);
 
@@ -17,26 +17,35 @@ void Renderer::link_shaders(const RenderConfig::Shaders& shaders){
 		shader.detach(*sh);
 	}
 	shader.check_link_status();
+	GL::get_error("linking");
 }
 
 void Renderer::draw(){
 	shader();
 	vao();
+	GL::get_error("binding");
 	
-	DrawBuffer::TextureHandles textures = drawbuffer.get_handles();
+	DrawBuffer::TextureHandles textures = drawbuffer->get_handles();
 	glActiveTexture(GL_TEXTURE0);
-	textures.t_left(GL_TEXTURE_1D);
+	GL::get_error("tex1");
+	textures.t_left(GL_TEXTURE_BUFFER);
+	GL::get_error("bind tex1");
 
 	glActiveTexture(GL_TEXTURE1);
-	textures.t_right(GL_TEXTURE_1D);
+	textures.t_right(GL_TEXTURE_BUFFER);
+	GL::get_error("tex2");
 
 	glActiveTexture(GL_TEXTURE2);
-	textures.t_f_left(GL_TEXTURE_1D);
+	textures.t_f_left(GL_TEXTURE_BUFFER);
+	GL::get_error("tex3");
 
 	glActiveTexture(GL_TEXTURE3);
-	textures.t_f_right(GL_TEXTURE_1D);
+	textures.t_f_right(GL_TEXTURE_BUFFER);
+	GL::get_error("tex4");
+	GL::get_error("textures");
 
 	glDrawArrays(renderconfig.drawtype, 0, renderconfig.output_size);
+	GL::get_error("drawing");
 
 	GL::VAO::unbind();
 	GL::Texture::unbind(GL_TEXTURE_1D);

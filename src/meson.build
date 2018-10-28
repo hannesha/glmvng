@@ -2,8 +2,9 @@ deps = []
 deps += dependency('gl')
 deps += dependency('libconfig++')
 deps += dependency('glfw3')
+deps += dependency('libpulse')
 
-files = ['GL_utils', 'main', 'Renderer', 'Drawbuffer', 'Config', 'xdg', 'Buffer', 'Processing', 'Utils']
+files = ['GL_utils', 'main', 'Renderer', 'Drawbuffer', 'Config', 'xdg', 'Buffer', 'Processing', 'Utils', 'Pulse_Async']
 src = []
 foreach f: files
 	src += f + '.cpp'

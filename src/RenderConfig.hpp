@@ -18,7 +18,7 @@ struct RenderConfig{
 	using Shaders = std::vector<Shader_ptr>;
 
 	unsigned output_size;
-	GLenum drawtype;
+	GLenum drawtype = GL_LINE_STRIP;
 	// Shaderconfig
 	ShaderConfig uniforms;
 

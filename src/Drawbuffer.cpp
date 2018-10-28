@@ -1,24 +1,33 @@
 #include "Drawbuffer.hpp"
+#include <iostream>
 
 DrawBuffer::DrawBuffer(){
+	b_left.bind();
 	t_left.bind(GL_TEXTURE_BUFFER);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, b_left.id);
+	GL::get_error("link_textures1");
 
+	b_right.bind();
 	t_right.bind(GL_TEXTURE_BUFFER);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, b_right.id);
+	GL::get_error("create_textures2");
 
+	b_f_left.bind();
 	t_f_left.bind(GL_TEXTURE_BUFFER);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, b_f_left.id);
+	GL::get_error("create_textures3:INVALID_OPERATION");
 	
+	b_f_right.bind();
 	t_f_right.bind(GL_TEXTURE_BUFFER);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, b_f_right.id);
+	GL::get_error("create_textures");
 
 	GL::Texture::unbind(GL_TEXTURE_BUFFER);
 }
 
 DrawBuffer::~DrawBuffer(){}
 
-void DrawBuffer::update(std::vector<Buffer<int16_t>>& buffers){
+void DrawBuffer::update(std::vector<Buffer<float>>& buffers){
 	{
 		auto lock = buffers[0].lock();
 		b_left.bind(GL_TEXTURE_BUFFER);
