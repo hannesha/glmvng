@@ -17,38 +17,36 @@ void Renderer::link_shaders(const RenderConfig::Shaders& shaders){
 		shader.detach(*sh);
 	}
 	shader.check_link_status();
-	GL::get_error("linking");
+GLDEBUG;
 }
 
 void Renderer::draw(){
 	shader();
 	vao();
-	GL::get_error("binding");
+GLDEBUG;
 	
 	DrawBuffer::TextureHandles textures = drawbuffer->get_handles();
 	glActiveTexture(GL_TEXTURE0);
-	GL::get_error("tex1");
 	textures.t_left(GL_TEXTURE_BUFFER);
-	GL::get_error("bind tex1");
+GLDEBUG;
 
 	glActiveTexture(GL_TEXTURE1);
 	textures.t_right(GL_TEXTURE_BUFFER);
-	GL::get_error("tex2");
+GLDEBUG;
 
 	glActiveTexture(GL_TEXTURE2);
 	textures.t_f_left(GL_TEXTURE_BUFFER);
-	GL::get_error("tex3");
+GLDEBUG;
 
 	glActiveTexture(GL_TEXTURE3);
 	textures.t_f_right(GL_TEXTURE_BUFFER);
-	GL::get_error("tex4");
-	GL::get_error("textures");
+GLDEBUG;
 
 	glDrawArrays(renderconfig.drawtype, 0, renderconfig.output_size);
-	GL::get_error("drawing");
+GLDEBUG;
 
 	GL::VAO::unbind();
-	GL::Texture::unbind(GL_TEXTURE_1D);
+	GL::Texture::unbind(GL_TEXTURE_BUFFER);
 }
 
 void Renderer::set_uniform(const ShaderConfig::value_type& val, GL::Program& sh) {
@@ -89,4 +87,5 @@ void Renderer::configure(){
 	for(auto& uniform : renderconfig.uniforms){
 		set_uniform(uniform, shader);
 	}
+GLDEBUG;
 }

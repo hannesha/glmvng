@@ -5,22 +5,22 @@ DrawBuffer::DrawBuffer(){
 	b_left.bind();
 	t_left.bind(GL_TEXTURE_BUFFER);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, b_left.id);
-	GL::get_error("link_textures1");
+GLDEBUG;
 
 	b_right.bind();
 	t_right.bind(GL_TEXTURE_BUFFER);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, b_right.id);
-	GL::get_error("create_textures2");
+GLDEBUG;
 
 	b_f_left.bind();
 	t_f_left.bind(GL_TEXTURE_BUFFER);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, b_f_left.id);
-	GL::get_error("create_textures3:INVALID_OPERATION");
+GLDEBUG;
 	
 	b_f_right.bind();
 	t_f_right.bind(GL_TEXTURE_BUFFER);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, b_f_right.id);
-	GL::get_error("create_textures");
+GLDEBUG;
 
 	GL::Texture::unbind(GL_TEXTURE_BUFFER);
 }
@@ -33,6 +33,7 @@ void DrawBuffer::update(std::vector<Buffer<float>>& buffers){
 		b_left.bind(GL_TEXTURE_BUFFER);
 		glBufferData(GL_TEXTURE_BUFFER, buffers[0].bsize(), 0, GL_DYNAMIC_DRAW);
 		glBufferSubData(GL_TEXTURE_BUFFER, 0, buffers[0].bsize(), buffers[0].data());
+GLDEBUG;
 	}
 
 	if(buffers.size() > 1){
@@ -40,6 +41,7 @@ void DrawBuffer::update(std::vector<Buffer<float>>& buffers){
 		b_right.bind(GL_TEXTURE_BUFFER);
 		glBufferData(GL_TEXTURE_BUFFER, buffers[1].bsize(), 0, GL_DYNAMIC_DRAW);
 		glBufferSubData(GL_TEXTURE_BUFFER, 0, buffers[1].bsize(), buffers[1].data());
+GLDEBUG;
 	}
 
 	GL::Buffer::unbind(GL_TEXTURE_BUFFER);

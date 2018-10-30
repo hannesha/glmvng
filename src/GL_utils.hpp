@@ -15,6 +15,11 @@
 	OpenGL RAII wrappers and convenience functions.
 */
 
+#define GLDEBUG_S(x) #x
+#define GLDEBUG_S_(x) GLDEBUG_S(x)
+#define GLDEBUGSTRING "GL: err " __FILE__ ", line " GLDEBUG_S_(__LINE__)
+#define GLDEBUG GL::get_error(GLDEBUGSTRING)
+
 namespace GL {
 //! Buffer RAII wrapper
 struct Buffer {
