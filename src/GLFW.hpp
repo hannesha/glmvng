@@ -2,11 +2,21 @@
 
 #include "GL_utils.hpp"
 #include <GLFW/glfw3.h>
+#include <string>
 
-// glfw raii wrapper
-class GLFW {
+class GLFWWindow {
 public:
-	GLFW() { if(!glfwInit()) throw std::runtime_error("GLFW init failed!"); };
+	GLFWWindow(); //TODO use window config
+	~GLFWWindow();
 
-	~GLFW() { glfwTerminate(); };
+	void swapBuffers();
+	bool shouldClose();
+
+	void setTitle(const std::string& title){
+		glfwSetWindowTitle(window, title.c_str());
+	}
+
+private:
+	GLFWwindow* window;
+	static void resizeCB(GLFWwindow* window, int w, int h);
 };

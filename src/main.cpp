@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "GLFW.hpp"
+#include "GLXwindow.hpp"
 
 #include "Config.hpp"
 #include "Drawbuffer.hpp"
@@ -13,12 +14,9 @@
 #include <cmath>
 
 int main() {
-	GLFW glfw;
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	GLFWwindow* window = glfwCreateWindow(640, 480, "test", nullptr, nullptr);
-	glfwMakeContextCurrent(window);
+	auto window = GLXwindow();
+
+	window.setTitle("window title");
 
 	// load extensions
 	GL::init();
@@ -53,7 +51,7 @@ int main() {
 	input->start_stream(input_cfg);
 
 	// mainloop
-	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClearColor(0.0, 0.0, 0.0, 0.0);
 	do{
 		draw_buf->update(bufs->bufs);
 
@@ -61,10 +59,9 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		rend.draw();
 
-		glfwPollEvents();
-		glfwSwapBuffers(window);
+		window.swapBuffers();
 	}
-	while(!glfwWindowShouldClose(window));
+	while(!window.shouldClose());
 
 	return 0;
 }
