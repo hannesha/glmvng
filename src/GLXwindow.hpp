@@ -37,6 +37,7 @@ class GLXwindow {
 		};
 
 		void swapBuffers();
+		void pollEvents();
 		bool shouldClose();
 
 		void setTitle(const std::string&);

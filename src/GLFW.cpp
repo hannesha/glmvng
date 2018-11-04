@@ -25,8 +25,11 @@ GLFWWindow::~GLFWWindow(){
 	glfwTerminate();
 }
 
-void GLFWWindow::swapBuffers(){
+void GLFWWindow::pollEvents(){
 	glfwPollEvents();
+}
+
+void GLFWWindow::swapBuffers(){
 	glfwSwapBuffers(window);
 }
 

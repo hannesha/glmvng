@@ -53,6 +53,7 @@ int main() {
 	// mainloop
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	do{
+		window.pollEvents();
 		draw_buf->update(bufs->bufs);
 
 

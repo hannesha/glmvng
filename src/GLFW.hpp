@@ -10,6 +10,7 @@ public:
 	~GLFWWindow();
 
 	void swapBuffers();
+	void pollEvents();
 	bool shouldClose();
 
 	void setTitle(const std::string& title){

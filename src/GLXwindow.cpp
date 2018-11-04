@@ -50,7 +50,7 @@ void GLXwindow::setTitle(const std::string& title){
 	XStoreName(display, win, title.c_str());
 }
 
-void GLXwindow::swapBuffers(){
+void GLXwindow::pollEvents(){
 	// handle X events
 	while(XPending(display) > 0){
 		XEvent event;
@@ -76,7 +76,9 @@ void GLXwindow::swapBuffers(){
 			break;
 		}
 	}
+}
 
+void GLXwindow::swapBuffers(){
 	glXSwapBuffers(display, win);
 }
 
