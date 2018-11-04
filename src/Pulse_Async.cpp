@@ -80,6 +80,7 @@ Pulse_Async::Pulse_Async(Buffers<float>::Ptr& buffers): p_buffers(buffers){
 		pa_context_unref(context);
 		lock.unlock();
 		pa_threaded_mainloop_free(mainloop);
+		throw std::runtime_error("Pulseaudio context is not ready!");
 	}
 
 	// get server info
