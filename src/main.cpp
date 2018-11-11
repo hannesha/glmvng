@@ -10,11 +10,12 @@
 #include "Renderer.hpp"
 #include "Input.hpp"
 #include "Pulse_Async.hpp"
+#include "Processing.hpp"
 
 #include <cmath>
 
 int main() {
-	auto window = GLXwindow();
+	auto window = GLFWWindow();
 
 	window.setTitle("window title");
 
@@ -52,8 +53,17 @@ int main() {
 
 	// mainloop
 	glClearColor(0.0, 0.0, 0.0, 0.0);
+	float old_rms = 0.5;
+	float rms_mix = 0.8;
 	do{
 		window.pollEvents();
+		float rms;
+		{
+			rms = std::sqrt(Processing::rms(bufs->bufs[0]) / bufs->bufs[0].size_());
+		}
+		old_rms = old_rms * (1.f - rms_mix) + rms * rms_mix;
+		ShaderConfig::value_type vrms = {"rms", Scalar(old_rms)};
+		rend.set_uniform(vrms);
 		draw_buf->update(bufs->bufs);
 
 

@@ -17,6 +17,10 @@ public:
 
 	void draw();
 
+	void set_uniform(const ShaderConfig::value_type& val){
+		set_uniform(val, shader);
+	}
+
 private:
 	const RenderConfig& renderconfig;
 	std::shared_ptr<DrawBuffer> drawbuffer;

@@ -60,13 +60,13 @@ void Renderer::set_uniform(const ShaderConfig::value_type& val, GL::Program& sh)
 
 	switch(val.second.type) {
 	case Scalar::Type::INT:
-		std::cout << "loc: " << loc << " setting int: " << val.first << std::endl;
+		//std::cout << "loc: " << loc << " setting int: " << val.first << std::endl;
 		glUniform1i(loc, val.second.value.i);
 		GL::get_error("set int");
 		break;
 
 	case Scalar::Type::FLOAT:
-		std::cout << "loc: " << loc << " setting float: " << val.first << std::endl;
+		//std::cout << "loc: " << loc << " setting float: " << val.first << std::endl;
 		glUniform1f(loc, val.second.value.f);
 		GL::get_error("set float");
 		break;

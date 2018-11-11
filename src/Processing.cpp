@@ -5,7 +5,7 @@ template <typename T>
 float Processing::rms(Buffer<T>& buffer){
 	auto lock = buffer.lock();
 	auto data = buffer.data();
-	auto size = buffer.bsize();
+	auto size = buffer.size_();
 	float rms = 0;
 	unsigned i = 0;
 
@@ -32,3 +32,6 @@ float Processing::rms(Buffer<T>& buffer){
 	}
 	return rms;
 }
+
+template float Processing::rms(Buffer<int16_t>&);
+template float Processing::rms<float>(Buffer<float>&);

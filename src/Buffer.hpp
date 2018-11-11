@@ -54,6 +54,10 @@ public:
 		return size * sizeof(T);
 	}
 
+	size_t size_() const {
+		return size;
+	}
+
 	const T* data() const {	
 		return v_buffer.data();
 	}
