@@ -39,8 +39,6 @@ void Config::reload(){
 		// clear shader cache
 		shaders.clear();
 
-		// parse
-
 		// iterate over RendererN, parse uniforms
 		unsigned index = 1;
 		while(true){
@@ -72,12 +70,10 @@ void Config::reload(){
 	}
 }
 
-//TODO generate renderconfig
 RenderConfig Config::parse_renderer(const std::string& path){
 	RenderConfig config;
 	std::string shader_path("shaders/");
-	//TODO parse base renderer settings
-	//TODO parse draw type, compute buf size ??
+	//TODO check output size
 
 	libconfig::Setting& cfg_shaders = cfg.lookup(path + ".shaders");
 	if(!cfg_shaders.isArray()){
@@ -95,6 +91,7 @@ RenderConfig Config::parse_renderer(const std::string& path){
 		
 	ShaderConfig uniforms;
 	parse_uniforms(cfg.lookup(path + ".uniforms"), uniforms);
+	uniforms.emplace("output_size_1", 1.f/config.output_size);
 	config.uniforms = uniforms;
 	return config;
 }
