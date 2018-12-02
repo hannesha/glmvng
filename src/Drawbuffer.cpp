@@ -1,4 +1,5 @@
 #include "Drawbuffer.hpp"
+#include "Utils.hpp"
 #include <iostream>
 
 DrawBuffer::DrawBuffer(){
@@ -42,6 +43,20 @@ GLDEBUG;
 		glBufferData(GL_TEXTURE_BUFFER, buffers[1].bsize(), 0, GL_DYNAMIC_DRAW);
 		glBufferSubData(GL_TEXTURE_BUFFER, 0, buffers[1].bsize(), buffers[1].data());
 GLDEBUG;
+	}
+
+	GL::Buffer::unbind(GL_TEXTURE_BUFFER);
+}
+
+void DrawBuffer::update_fft(const std::vector<Magnitudes>& ffts){
+	b_f_left.bind(GL_TEXTURE_BUFFER);
+	glBufferData(GL_TEXTURE_BUFFER, (GLsizeiptr)Utils::csizeof(ffts.at(0)), 0, GL_DYNAMIC_DRAW);
+	glBufferSubData(GL_TEXTURE_BUFFER, 0, (GLsizeiptr)Utils::csizeof(ffts.at(0)), ffts.at(0).data());
+
+	if(ffts.size() > 1){
+		b_f_right.bind(GL_TEXTURE_BUFFER);
+		glBufferData(GL_TEXTURE_BUFFER, (GLsizeiptr)Utils::csizeof(ffts[1]), 0, GL_DYNAMIC_DRAW);
+		glBufferSubData(GL_TEXTURE_BUFFER, 0, (GLsizeiptr)Utils::csizeof(ffts[1]), ffts[1].data());
 	}
 
 	GL::Buffer::unbind(GL_TEXTURE_BUFFER);

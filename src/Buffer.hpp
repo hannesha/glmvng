@@ -27,7 +27,7 @@
 template<typename T>
 class Buffer {
 	std::vector<T> v_buffer;
-	size_t size;
+	size_t size_;
 	std::mutex m;
 
 	std::vector<T> ibuf; // intermediate buffer for interleaved writes
@@ -37,7 +37,7 @@ class Buffer {
 public:
 	Buffer(const size_t);
 	Buffer(const Buffer& b) = delete;
-	Buffer(Buffer&& b): v_buffer(std::move(b.v_buffer)), size(std::move(b.size)){};
+	Buffer(Buffer&& b): v_buffer(std::move(b.v_buffer)), size_(std::move(b.size_)){};
 	//Buffer& operator=(Buffer&& b){ v_buffer = std::move(b.v_buffer); size = std::move(b.size);  return *this; };
 
 	bool new_data;
@@ -51,11 +51,11 @@ public:
 	void resize(const size_t);
 
 	size_t bsize() const {
-		return size * sizeof(T);
+		return size_ * sizeof(T);
 	}
 
-	size_t size_() const {
-		return size;
+	size_t size() const {
+		return size_;
 	}
 
 	const T* data() const {	

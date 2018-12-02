@@ -54,7 +54,7 @@ void Renderer::set_uniform(const ShaderConfig::value_type& val, GL::Program& sh)
 	//std::cout << loc << std::endl;
 	if(loc < 0) {
 		// log unused value
-		std::cout << "Ignoring: " << val.first << std::endl;
+		//std::cout << "Ignoring: " << val.first << std::endl;
 		return;
 	}
 

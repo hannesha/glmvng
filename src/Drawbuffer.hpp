@@ -2,6 +2,7 @@
 
 #include "GL_utils.hpp"
 #include "Buffer.hpp"
+#include "Magnitudes.hpp"
 // buffer textures
 // update(buffer&)
 //
@@ -11,8 +12,8 @@ public:
 	DrawBuffer();
 	~DrawBuffer();
 
-	void update(std::vector<Buffer<float>>& );
-//	void update_fft(const std::vector<FFT>& ffts);
+	void update(std::vector<Buffer<float>>&);
+	void update_fft(const std::vector<Magnitudes>&);
 
 	struct TextureHandles{
 		const GL::Texture &t_left, &t_right, &t_f_left, &t_f_right;

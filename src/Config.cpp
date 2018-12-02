@@ -36,6 +36,8 @@ void Config::reload(){
 	try{
 		cfg.readFile(file.c_str());
 
+		// parse input settings
+
 		// clear shader cache
 		shaders.clear();
 

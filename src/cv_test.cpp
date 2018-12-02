@@ -100,9 +100,9 @@ struct fft_thread {
 
 			//print_sync("starting work");
 
-			//for(int i = 0; i < test.size(); i++){
-			//	test[i] = (long)std::pow(13, i) % 17L;
-			//}
+			for(int i = 0; i < test.size(); i++){
+				test[i] = (long)std::pow(127, i) % 8191L;
+			}
 
 			//print_sync("done");
 			s2.notify();

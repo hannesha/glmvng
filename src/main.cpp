@@ -11,11 +11,21 @@
 #include "Input.hpp"
 #include "Pulse_Async.hpp"
 #include "Processing.hpp"
+#include "FFT.hpp"
 
 #include <cmath>
+#include <csignal>
+#include <atomic>
+
+std::atomic<bool> running(true);
+
+void sigint_handler(int signal){
+	running = false;
+}
 
 int main() {
-	auto window = GLFWWindow();
+	std::signal(SIGINT, sigint_handler);
+	auto window = GLXwindow();
 
 	window.setTitle("window title");
 
@@ -33,7 +43,10 @@ int main() {
 	GL::get_error("create render");
 	// init fft
 	Buffers<float>::Ptr bufs(new Buffers<float>());
-	bufs->bufs.emplace_back(cfg.renderers[0].output_size);
+	bufs->bufs.emplace_back(2200);
+	FFT fft(4096);
+	std::vector<Magnitudes> mags(1, Magnitudes(4096));
+	Processing::GravityInfo gravity_info(4096);
 
 //	std::vector<float> test_data(100);
 //	for(int x = 0; x < 100; x++){
@@ -52,19 +65,24 @@ int main() {
 	input->start_stream(input_cfg);
 
 	// mainloop
-	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClearColor(0.0, 0.0, 0.0, 0.8);
 	float old_rms = 0.5;
 	float rms_mix = 0.8;
 	do{
 		window.pollEvents();
 		float rms;
 		{
-			rms = std::sqrt(Processing::rms(bufs->bufs[0]) / bufs->bufs[0].size_());
+			rms = std::sqrt(Processing::rms(bufs->bufs[0]) / bufs->bufs[0].size());
 		}
 		old_rms = old_rms * (1.f - rms_mix) + rms * rms_mix;
 		ShaderConfig::value_type vrms = {"rms", Scalar(old_rms)};
 		rend.set_uniform(vrms);
 		draw_buf->update(bufs->bufs);
+
+		fft.calculate(bufs->bufs[0]);
+		fft.magnitudes(mags[0], 1);
+		Processing::calculate_gravity(mags[0], gravity_info, 1., 0.016);
+		draw_buf->update_fft(mags);
 
 
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -72,7 +90,7 @@ int main() {
 
 		window.swapBuffers();
 	}
-	while(!window.shouldClose());
+	while(!window.shouldClose() && running);
 
 	return 0;
 }

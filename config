@@ -1,0 +1,18 @@
+testf = 1.
+slope = 1.
+
+Renderer1: {
+	//shaders = ["osc.frag", "osc_ring.vert", "osc.geom"];
+	//shaders = ["osc.frag", "osc.vert", "osc.geom"];
+	shaders = ["simple.frag", "bar.vert", "bar.geom"];
+	output_size = 100;
+	drawtype = "points";
+	test = 1.
+
+	uniforms = {
+		scale = 1.2;
+		width = 0.01;
+		sigma = 1.3;
+		sigma_coeff = 3.0;
+	}
+}

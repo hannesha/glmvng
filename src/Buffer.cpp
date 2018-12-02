@@ -26,7 +26,7 @@ Buffer<T>::Buffer(const size_t size){
 	static_assert(std::is_arithmetic<T>::value, "Buffer<T> only supports arithmetic types!");
 
 	v_buffer.resize(size);
-	this->size = size;
+	size_ = size;
 	new_data = true;
 }
 
@@ -64,7 +64,7 @@ void Buffer<T>::write(T buf[], const size_t n){
 	new_data = true;
 
 	// limit data to write
-	size_t length = std::min(n, size);
+	size_t length = std::min(n, size());
 	i_write(buf, length);
 }
 
@@ -74,7 +74,7 @@ void Buffer<T>::write(const std::vector<T>& buf){
 	new_data = true;
 
 	// limit data to write
-	size_t length = std::min(buf.size(), size);
+	size_t length = std::min(buf.size(), size());
 	i_write(buf, length);
 }
 
@@ -84,7 +84,7 @@ void Buffer<T>::write_offset(T buf[], const size_t n, const size_t gap, const si
 	new_data = true;
 
 	// limit data to write
-	size_t length = std::min(ceil_div(n - offset, gap), size);
+	size_t length = std::min(ceil_div(n - offset, gap), size());
 	size_t current = offset;
 
 	// resize intermediate buffer
@@ -102,7 +102,7 @@ void Buffer<T>::write_offset(const std::vector<T>& buf, const size_t gap, const 
 	new_data = true;
 
 	// limit data to write
-	size_t length = std::min(ceil_div(buf.size() - offset, gap), size);
+	size_t length = std::min(ceil_div(buf.size() - offset, gap), size());
 	size_t current = offset;
 
 	// resize intermediate buffer
@@ -117,8 +117,8 @@ void Buffer<T>::write_offset(const std::vector<T>& buf, const size_t gap, const 
 template<typename T>
 void Buffer<T>::resize(const size_t n){
 	auto lock = this->lock();
-	if(size != n){
-		size = n;
+	if(size() != n){
+		size_ = n;
 		v_buffer.resize(n);
 		new_data = true;
 	}
