@@ -2,8 +2,8 @@
 
 uniform samplerBuffer t_f_left;
 
-const vec4 bot_color = vec4(0.5, 0.5, 0.5, 1.);
-const vec4 top_color = vec4(1., 0.5, 0.5, 1.);
+const vec4 bot_color = vec4(1., 0.3, 0.3, 1.);
+const vec4 top_color = vec4(1., 0.3, 0.3, 1.);
 
 const float upper_limit = -10;
 const float lower_limit = -60;

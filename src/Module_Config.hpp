@@ -30,20 +30,14 @@ namespace Module_Config {
 		std::string file = "/tmp/mpd.fifo";
 		std::string device = "";
 		bool stereo = false;
-		long long f_sample = 44100;
-		long long latency = 1100; // f_sample * s_latency(0.025 s)
+		int f_sample = 48000;
+		int latency = 1100; // f_sample * s_latency(0.025 s)
+		int buffer_len = 4096;
 
 		inline bool operator==(const Input& rhs) const{
 			return std::tie(source, stereo, f_sample)
 				== std::tie(rhs.source, rhs.stereo, rhs.f_sample);
 		}
-	};
-
-	struct FFT {
-		long long size = 1<<12;
-		size_t output_size = size/2+1;
-		float scale = 2.76678e-08;
-		float d_freq = 44100./(float) size;
 	};
 
 	struct Transformation {
@@ -63,40 +57,5 @@ namespace Module_Config {
 				rgba[i] = rgba[i] / 255;
 			}
 		}
-	};
-
-	struct Oscilloscope {
-		int channel = 0;
-		float scale = 1;
-		float width = 0.01;
-		float sigma = 4;
-		float sigma_coeff = 2;
-		Color color = {1, 1, 1, 1};
-		Transformation pos;
-	};
-
-	struct Spectrum {
-		int channel = 0;
-		float min_db = -60, max_db = -5;
-		float scale = 2.76678e-08;
-		float slope = 0.5;
-		float offset = 1.0;
-		int output_size = 100;
-		int data_offset = 0;
-		float log_start = 5;
-		float log_enabled = 0;
-
-		Color top_color = {1, 1, 1, 1};
-		Color bot_color = {1, 1, 1, 1};
-		Color line_color = {0.57, 0.57, 0.57, 1};
-		Transformation pos;
-		float gradient = 1.0;
-		float gravity = 8.0;
-		float bar_width = 0.5;
-
-		bool rainbow = false;
-		Color freq_d = {1, 1, 1, 1};
-		Color phase_d = {0, 0, 0, 1};
-		bool dB_lines = false;
 	};
 }

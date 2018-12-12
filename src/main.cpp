@@ -43,10 +43,11 @@ int main() {
 	GL::get_error("create render");
 	// init fft
 	Buffers<float>::Ptr bufs(new Buffers<float>());
-	bufs->bufs.emplace_back(2200);
-	FFT fft(4096);
-	std::vector<Magnitudes> mags(1, Magnitudes(4096));
-	Processing::GravityInfo gravity_info(4096);
+	bufs->bufs.emplace_back(cfg.input.buffer_len);
+	const int fft_len = 4096;
+	FFT fft(fft_len);
+	std::vector<Magnitudes> mags(1, Magnitudes(fft_len));
+	Processing::GravityInfo gravity_info(fft_len);
 
 //	std::vector<float> test_data(100);
 //	for(int x = 0; x < 100; x++){
@@ -61,8 +62,7 @@ int main() {
 	
 	// generate Renderers from config
 	Input::Ptr input(new Pulse_Async(bufs));
-	Module_Config::Input input_cfg;
-	input->start_stream(input_cfg);
+	input->start_stream(cfg.input);
 
 	// mainloop
 	glClearColor(0.0, 0.0, 0.0, 0.8);

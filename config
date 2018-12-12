@@ -1,13 +1,15 @@
 testf = 1.
 slope = 1.
 
+Input = {
+	buffer_duration = 50;
+	f_sample = 48000;
+}
+
 Renderer1: {
-	//shaders = ["osc.frag", "osc_ring.vert", "osc.geom"];
-	//shaders = ["osc.frag", "osc.vert", "osc.geom"];
 	shaders = ["simple.frag", "bar.vert", "bar.geom"];
 	output_size = 100;
 	drawtype = "points";
-	test = 1.
 
 	uniforms = {
 		scale = 1.2;

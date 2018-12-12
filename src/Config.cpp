@@ -40,6 +40,7 @@ void Config::reload(){
 
 		// clear shader cache
 		shaders.clear();
+		parse_input(input, "Input");
 
 		// iterate over RendererN, parse uniforms
 		unsigned index = 1;
@@ -63,7 +64,8 @@ void Config::reload(){
 	}catch(const libconfig::FileIOException &fioex){
 		std::cerr << "I/O error while reading file." << std::endl;
 
-		std::cout << "Using default settings." << std::endl;
+		std::cout << "Aborting." << std::endl;
+		throw fioex;
 	}catch(const libconfig::ParseException &pex){
 		std::cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine()
 		<< " - " << pex.getError() << std::endl;
@@ -88,7 +90,9 @@ RenderConfig Config::parse_renderer(const std::string& path){
 		config.shaders.push_back(shader_ptr);
 	}
 	
-	config.output_size = cfg.lookup(path + ".output_size");
+	if(!cfg.lookupValue(path + ".output_size", config.output_size)){
+		config.output_size = input.buffer_len;
+	}
 	config.drawtype = parse_drawtype(cfg.lookup(path + ".drawtype"));
 		
 	ShaderConfig uniforms;
@@ -182,5 +186,29 @@ void Config::parse_uniforms(libconfig::Setting& root, ShaderConfig& sh_config){
 
 		std::string name = s.getName();
 		sh_config.emplace(name, setting_to_scalar(s));
+	}
+}
+
+void Config::parse_input(Module_Config::Input& i, const std::string& path){
+	std::string str_source;
+	cfg.lookupValue(path + ".source", str_source);
+	// convert string to lowercase and evaluate source
+	std::transform(str_source.begin(), str_source.end(), str_source.begin(), ::tolower);
+	if(str_source == "pulse"){
+		i.source = Module_Config::Source::PULSE;
+	}else{
+		i.source = Module_Config::Source::FIFO;
+	}
+
+	cfg.lookupValue(path + ".file", i.file);
+	cfg.lookupValue(path + ".device", i.device);
+	cfg.lookupValue(path + ".stereo", i.stereo);
+	cfg.lookupValue(path + ".f_sample", i.f_sample);
+	int buffer_duration;
+	cfg.lookupValue(path + ".buffer_duration", buffer_duration);
+	i.buffer_len = i.f_sample * buffer_duration / 1000;
+
+	if(i.buffer_len <= 0){
+		i.buffer_len = 4096;
 	}
 }

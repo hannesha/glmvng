@@ -1,7 +1,7 @@
 #pragma once
 
 #include <libconfig.h++>
-//#include "Module_Config.hpp"
+#include "Module_Config.hpp"
 //#include "Scalar.hpp"
 #include <memory>
 #include "RenderConfig.hpp"
@@ -24,12 +24,14 @@ class Config {
 		GLenum get_shader_type(const std::string&);
 
 		std::vector<RenderConfig> renderers;
+		Module_Config::Input input;
 
 	private:
 		RenderConfig parse_renderer(const std::string&);
 		GLenum parse_drawtype(const char*);
 		static bool rfind(const std::string&, const std::string&);
 		void parse_uniforms(libconfig::Setting&, ShaderConfig&);
+		void parse_input(Module_Config::Input&, const std::string&);
 		std::shared_ptr<GL::Shader> load_shader(const std::string& path);
 		
 		libconfig::Config cfg;
