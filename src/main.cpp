@@ -31,6 +31,9 @@ int main() {
 
 	// load extensions
 	GL::init();
+	// clear window
+	glClearColor(0.0, 0.0, 0.0, 0.8);
+	window.swapBuffers();
 
 	Config cfg("config");
 
