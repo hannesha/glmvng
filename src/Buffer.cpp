@@ -43,20 +43,20 @@ static inline T ceil_div(const T x, const T y){
 
 
 template<typename T>
-inline void Buffer<T>::i_write(T buf[], const size_t n){
+inline void Buffer<T>::i_write(const T buf[], const size_t n){
 	// move old data
 	std::copy(v_buffer.begin() + n, v_buffer.end(), v_buffer.begin());
 	// append new data
 	std::copy(buf, buf + n, v_buffer.end() - n);
 }
 
-template<typename T>
+/*template<typename T>
 inline void Buffer<T>::i_write(const std::vector<T>& buf, const size_t n){
 	// move old data
 	std::copy(v_buffer.begin() + n, v_buffer.end(), v_buffer.begin());
 	// append new data
 	std::copy(buf.begin(), buf.begin() + n, v_buffer.end() - n);
-}
+}*/
 
 template<typename T>
 void Buffer<T>::write(T buf[], const size_t n){
@@ -75,7 +75,7 @@ void Buffer<T>::write(const std::vector<T>& buf){
 
 	// limit data to write
 	size_t length = std::min(buf.size(), size());
-	i_write(buf, length);
+	i_write(buf.data(), length);
 }
 
 template<typename T>
@@ -93,7 +93,7 @@ void Buffer<T>::write_offset(T buf[], const size_t n, const size_t gap, const si
 		ibuf[i] = buf[current];
 		current += gap;
 	}
-	i_write(ibuf, length);
+	i_write(ibuf.data(), length);
 }
 
 template<typename T>
@@ -111,7 +111,7 @@ void Buffer<T>::write_offset(const std::vector<T>& buf, const size_t gap, const 
 		ibuf[i] = buf[current];
 		current += gap;
 	}
-	i_write(ibuf, length);
+	i_write(ibuf.data(), length);
 }
 
 template<typename T>

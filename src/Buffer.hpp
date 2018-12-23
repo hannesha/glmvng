@@ -31,8 +31,8 @@ class Buffer {
 	std::mutex m;
 
 	std::vector<T> ibuf; // intermediate buffer for interleaved writes
-	void i_write(T buf[], const size_t);
-	void i_write(const std::vector<T>&, const size_t);
+	void i_write(const T buf[], const size_t);
+	//void i_write(const std::vector<T>&, const size_t);
 
 public:
 	Buffer(const size_t);
