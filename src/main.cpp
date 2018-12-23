@@ -23,7 +23,7 @@ void sigint_handler(int signal){
 	running = false;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 	std::signal(SIGINT, sigint_handler);
 	auto window = GLXwindow();
 
@@ -32,38 +32,38 @@ int main() {
 	// load extensions
 	GL::init();
 	// clear window
+	window.pollEvents();
 	glClearColor(0.0, 0.0, 0.0, 0.8);
+	glClear(GL_COLOR_BUFFER_BIT);
 	window.swapBuffers();
 
-	Config cfg("config");
+	std::string config_file = "config";
+
+	if(argc > 1){
+		config_file = argv[1];
+	}
+
+	Config cfg(config_file);
 
 	// init buffers
-	// init audio stream
-
 	std::shared_ptr<DrawBuffer> draw_buf = std::make_shared<DrawBuffer>();
-	GL::get_error("create");
+	GLDEBUG;
 	Renderer rend(cfg.renderers[0], draw_buf);
-	GL::get_error("create render");
-	// init fft
+	GLDEBUG;
+	// create audio buffer
 	Buffers<float>::Ptr bufs(new Buffers<float>());
 	bufs->bufs.emplace_back(cfg.input.buffer_len);
-	const int fft_len = 4096;
-	FFT fft(fft_len);
-	std::vector<Magnitudes> mags(1, Magnitudes(fft_len));
-	Processing::GravityInfo gravity_info(fft_len);
-
-//	std::vector<float> test_data(100);
-//	for(int x = 0; x < 100; x++){
-//		test_data[x] = std::sin(static_cast<float>(x)/10);
-//	}
-//	bufs.bufs[0].write(test_data);
-//	draw_buf->update(bufs.bufs);
-	GL::get_error("update");
+	// init fft
+	FFT fft(cfg.input.fft_size);
+	std::vector<Magnitudes> mags(1, Magnitudes(cfg.input.fft_size));
+	// create processing buffer
+	Processing::GravityInfo gravity_info(cfg.input.fft_size);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GLDEBUG;
 	
-	// generate Renderers from config
+	// init audio stream
 	Input::Ptr input(new Pulse_Async(bufs));
 	input->start_stream(cfg.input);
 
@@ -73,21 +73,27 @@ int main() {
 	float rms_mix = 0.8;
 	do{
 		window.pollEvents();
-		float rms;
-		{
-			rms = std::sqrt(Processing::rms(bufs->bufs[0]) / bufs->bufs[0].size());
-		}
+		// calculate rms
+		float rms = std::sqrt(Processing::rms(bufs->bufs[0]) / bufs->bufs[0].size());
 		old_rms = old_rms * (1.f - rms_mix) + rms * rms_mix;
+		// set rms
 		ShaderConfig::value_type vrms = {"rms", Scalar(old_rms)};
 		rend.set_uniform(vrms);
+		// update buffer
 		draw_buf->update(bufs->bufs);
 
+		// calulate spectrum
 		fft.calculate(bufs->bufs[0]);
+		// processing
 		fft.magnitudes(mags[0], 1);
-		Processing::calculate_gravity(mags[0], gravity_info, 1., 0.016);
+		const float dt = 0.016;
+		const float gravity = 1;
+		Processing::calculate_gravity(mags[0], gravity_info, gravity, dt);
+
+		// update buffer
 		draw_buf->update_fft(mags);
 
-
+		// draw
 		glClear(GL_COLOR_BUFFER_BIT);
 		rend.draw();
 

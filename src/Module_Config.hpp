@@ -31,6 +31,7 @@ namespace Module_Config {
 		std::string device = "";
 		bool stereo = false;
 		int f_sample = 48000;
+		int fft_size = 4096;
 		int latency = 1100; // f_sample * s_latency(0.025 s)
 		int buffer_len = 4096;
 

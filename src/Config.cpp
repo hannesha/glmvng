@@ -204,6 +204,7 @@ void Config::parse_input(Module_Config::Input& i, const std::string& path){
 	cfg.lookupValue(path + ".device", i.device);
 	cfg.lookupValue(path + ".stereo", i.stereo);
 	cfg.lookupValue(path + ".f_sample", i.f_sample);
+	cfg.lookupValue(path + ".fft_size", i.fft_size);
 	int buffer_duration;
 	cfg.lookupValue(path + ".buffer_duration", buffer_duration);
 	i.buffer_len = i.f_sample * buffer_duration / 1000;
