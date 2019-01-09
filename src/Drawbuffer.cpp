@@ -30,18 +30,18 @@ DrawBuffer::~DrawBuffer(){}
 
 void DrawBuffer::update(std::vector<Buffer<float>>& buffers){
 	{
-		auto lock = buffers[0].lock();
+		auto readhandle = buffers[0].map_read();
 		b_left.bind(GL_TEXTURE_BUFFER);
 		glBufferData(GL_TEXTURE_BUFFER, buffers[0].bsize(), 0, GL_DYNAMIC_DRAW);
-		glBufferSubData(GL_TEXTURE_BUFFER, 0, buffers[0].bsize(), buffers[0].data());
+		glBufferSubData(GL_TEXTURE_BUFFER, 0, buffers[0].bsize(), readhandle.data());
 GLDEBUG;
 	}
 
 	if(buffers.size() > 1){
-		auto lock = buffers[1].lock();
+		auto readhandle2 = buffers[1].map_read();
 		b_right.bind(GL_TEXTURE_BUFFER);
 		glBufferData(GL_TEXTURE_BUFFER, buffers[1].bsize(), 0, GL_DYNAMIC_DRAW);
-		glBufferSubData(GL_TEXTURE_BUFFER, 0, buffers[1].bsize(), buffers[1].data());
+		glBufferSubData(GL_TEXTURE_BUFFER, 0, buffers[1].bsize(), readhandle2.data());
 GLDEBUG;
 	}
 

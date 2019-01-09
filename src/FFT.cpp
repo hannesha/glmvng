@@ -101,28 +101,24 @@ void FFT::calculate(Buffer<T>& buffer){
 		calculate_window(window_size, Window::Blackman());
 	}
 
-	auto lock = buffer.lock();
-	if(buffer.new_data){
-		buffer.new_data = false;
 
-		const T* data = buffer.data();
-
-		unsigned int i;
-		for(i = 0; i < window_size; i++){
+	unsigned int i = 0;
+	{
+		auto readhandle = buffer.map_read();
+		const T* data = readhandle.data();
+		for(; i < window_size; i++){
 			// apply hann window with corrected factors (a * 2)
 			input[i] = static_cast<float>(data[i + buffer_start]) * window[i];
 		}
-
-		lock.unlock();
-
-		// pad remainig values
-		for(; i < size; i++){
-			input[i] = 0;
-		}
-
-		// execute fft
-		fftwf_execute(plan);
 	}
+
+	// pad remainig values
+	for(; i < size; i++){
+		input[i] = 0;
+	}
+
+	// execute fft
+	fftwf_execute(plan);
 }
 
 template<typename T>

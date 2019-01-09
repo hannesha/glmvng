@@ -21,20 +21,69 @@
 
 #include <vector>
 #include <cstdint>
-#include <mutex>
+#include <shared_mutex>
 #include <memory>
+
 
 template<typename T>
 class Buffer {
 	std::vector<T> v_buffer;
 	size_t size_;
-	std::mutex m;
+	std::shared_mutex m;
 
 	std::vector<T> ibuf; // intermediate buffer for interleaved writes
 	void i_write(const T buf[], const size_t);
 	//void i_write(const std::vector<T>&, const size_t);
 
+	void read_lock(){
+		m.lock_shared();
+	};
+	void read_unlock(){
+		m.unlock_shared();
+	};
+	void write_lock(){
+		m.lock();
+	};
+	void write_unlock(){
+		m.unlock();
+	};
+
 public:
+	class Handle {
+		const T* data_;
+		Buffer<T>& buffer_;
+		bool write_ = true;
+
+	public:
+		Handle(Buffer<T>& buffer): buffer_(buffer){
+			buffer_.read_lock();
+			data_ = buffer.data();
+		}
+
+		Handle(Buffer<T>& buffer, unsigned size): buffer_(buffer){
+			buffer_.write_lock();
+			//data_ = buffer.allocate(size);
+			write_ = true;
+		}
+
+		~Handle() {
+			if(write_){
+				buffer_.write_unlock();
+			}else{
+				buffer_.read_unlock();
+			}
+		}
+
+		const T* data(){
+			return data_;
+		}
+
+		//operator[]
+		//operator*
+	};
+
+	friend class Handle;
+
 	Buffer(const size_t);
 	Buffer(const Buffer& b) = delete;
 	Buffer(Buffer&& b): v_buffer(std::move(b.v_buffer)), size_(std::move(b.size_)){};
@@ -42,7 +91,7 @@ public:
 
 	bool new_data;
 
-	std::unique_lock<std::mutex> lock();
+	std::unique_lock<std::shared_mutex> lock();
 
 	void write(T buf[], const size_t);
 	void write(const std::vector<T>& buf);
@@ -58,14 +107,24 @@ public:
 		return size_;
 	}
 
-	const T* data() const {	
+	const T* data() const {
 		return v_buffer.data();
 	}
+
+	const Handle map_read() {
+		return Handle(*this);
+	}
+
+	const Handle map_write(unsigned size) {
+		return Handle(*this, size);
+	}
+
 
 	const decltype(v_buffer)& vector() const {
 		return v_buffer;
 	}
 };
+
 
 template<typename T>
 struct Buffers{

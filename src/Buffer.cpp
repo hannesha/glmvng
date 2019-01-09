@@ -31,8 +31,8 @@ Buffer<T>::Buffer(const size_t size){
 }
 
 template<typename T>
-std::unique_lock<std::mutex> Buffer<T>::lock(){
-	return std::unique_lock<std::mutex>(m);
+std::unique_lock<std::shared_mutex> Buffer<T>::lock(){
+	return std::unique_lock<std::shared_mutex>(m);
 }
 
 // ceiling division

@@ -5,6 +5,7 @@ deps += dependency('glfw3')
 deps += dependency('libpulse')
 deps += dependency('x11')
 deps += dependency('fftw3f')
+deps += dependency('threads')
 
 files = ['GL_utils', 'main', 'Renderer', 'Drawbuffer', 'Config', 'xdg', 'Buffer', 'Processing', 'Utils', 'Pulse_Async', 'GLFW', 'GLXwindow', 'FFT']
 src = []
