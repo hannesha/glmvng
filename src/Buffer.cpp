@@ -25,9 +25,10 @@ template<typename T>
 Buffer<T>::Buffer(const size_t size){
 	static_assert(std::is_arithmetic<T>::value, "Buffer<T> only supports arithmetic types!");
 
-	v_buffer.resize(size);
-	size_ = size;
-	new_data = true;
+	size_ = 0;
+	resize(size);
+
+	offset = 0;
 }
 
 template<typename T>
@@ -35,91 +36,75 @@ std::unique_lock<std::shared_mutex> Buffer<T>::lock(){
 	return std::unique_lock<std::shared_mutex>(m);
 }
 
-// ceiling division
 template<typename T>
-static inline T ceil_div(const T x, const T y){
-	return x/y + (x % y !=0);
-}
-
-
-template<typename T>
-inline void Buffer<T>::i_write(const T buf[], const size_t n){
-	// move old data
-	std::copy(v_buffer.begin() + n, v_buffer.end(), v_buffer.begin());
-	// append new data
-	std::copy(buf, buf + n, v_buffer.end() - n);
-}
-
-/*template<typename T>
-inline void Buffer<T>::i_write(const std::vector<T>& buf, const size_t n){
-	// move old data
-	std::copy(v_buffer.begin() + n, v_buffer.end(), v_buffer.begin());
-	// append new data
-	std::copy(buf.begin(), buf.begin() + n, v_buffer.end() - n);
-}*/
-
-template<typename T>
-void Buffer<T>::write(T buf[], const size_t n){
-	auto lock = this->lock();
+void Buffer<T>::write(const T buf[], const size_t n){
+	Buffer<T>::Handle handle  = map_write(n);
 	new_data = true;
-
-	// limit data to write
-	size_t length = std::min(n, size());
-	i_write(buf, length);
+	std::copy(buf, buf + n, handle.wdata());
 }
 
 template<typename T>
 void Buffer<T>::write(const std::vector<T>& buf){
-	auto lock = this->lock();
-	new_data = true;
-
-	// limit data to write
-	size_t length = std::min(buf.size(), size());
-	i_write(buf.data(), length);
-}
-
-template<typename T>
-void Buffer<T>::write_offset(T buf[], const size_t n, const size_t gap, const size_t offset){
-	auto lock = this->lock();
-	new_data = true;
-
-	// limit data to write
-	size_t length = std::min(ceil_div(n - offset, gap), size());
-	size_t current = offset;
-
-	// resize intermediate buffer
-	if(ibuf.size() < length) ibuf.resize(length);
-	for(size_t i = 0; i<length; i++){
-		ibuf[i] = buf[current];
-		current += gap;
-	}
-	i_write(ibuf.data(), length);
-}
-
-template<typename T>
-void Buffer<T>::write_offset(const std::vector<T>& buf, const size_t gap, const size_t offset){
-	auto lock = this->lock();
-	new_data = true;
-
-	// limit data to write
-	size_t length = std::min(ceil_div(buf.size() - offset, gap), size());
-	size_t current = offset;
-
-	// resize intermediate buffer
-	if(ibuf.size() < length) ibuf.resize(length);
-	for(size_t i = 0; i<length; i++){
-		ibuf[i] = buf[current];
-		current += gap;
-	}
-	i_write(ibuf.data(), length);
+	write(buf.data(), buf.size());
 }
 
 template<typename T>
 void Buffer<T>::resize(const size_t n){
+	// allocate larger chunk
+	const unsigned factor = 3;
 	auto lock = this->lock();
 	if(size() != n){
 		size_ = n;
-		v_buffer.resize(n);
+		v_buffer.resize(n * factor);
 		new_data = true;
+	}
+}
+
+
+template<typename T>
+T* Buffer<T>::allocate(const unsigned data_size){
+	if(data_size > size()){
+		throw std::runtime_error("Requested data size is too large");
+	}
+
+	offset = offset + data_size;
+
+	unsigned diff = size() - data_size;
+	if(offset > (v_buffer.size() - size())){
+		// move current data to the front
+		std::copy(v_buffer.begin() + offset, v_buffer.begin() + offset + diff, v_buffer.begin());
+		offset = 0;
+	}
+
+	return &(v_buffer[offset]) + diff;
+}
+
+template<typename T>
+void Buffers<T>::write(T buf[], size_t data_size){
+	// limit data size
+	auto &buffer = bufs[0];
+	int n = bufs.size();
+	if(data_size > buffer.size() * n){
+		auto diff = data_size - buffer.size() * n;
+		data_size = buffer.size()*n;
+		buf += diff;
+	}
+	if(bufs.size() > 1){
+		// acquire handles and map buffers
+		std::vector<typename Buffer<T>::Handle> handles;
+		std::vector<T*> data_ptrs;
+		for(auto& buffer : bufs){
+			handles.push_back(std::move(buffer.map_write(data_size/n)));
+			data_ptrs.push_back(handles.back().wdata());
+		}
+
+		// interleaved write
+		for(unsigned i = 0; i < data_size; i++){
+			data_ptrs[i%n][i/n] = buf[i];
+		}
+	}else{
+		//use direct write
+
+		buffer.write(buf, data_size);
 	}
 }

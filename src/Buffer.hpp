@@ -29,11 +29,8 @@ template<typename T>
 class Buffer {
 	std::vector<T> v_buffer;
 	size_t size_;
+	unsigned offset = 0;
 	std::shared_mutex m;
-
-	std::vector<T> ibuf; // intermediate buffer for interleaved writes
-	void i_write(const T buf[], const size_t);
-	//void i_write(const std::vector<T>&, const size_t);
 
 	void read_lock(){
 		m.lock_shared();
@@ -51,8 +48,10 @@ class Buffer {
 public:
 	class Handle {
 		const T* data_;
+		T* wdata_ = nullptr;
 		Buffer<T>& buffer_;
 		bool write_ = true;
+		bool locked_ = true;
 
 	public:
 		Handle(Buffer<T>& buffer): buffer_(buffer){
@@ -62,11 +61,23 @@ public:
 
 		Handle(Buffer<T>& buffer, unsigned size): buffer_(buffer){
 			buffer_.write_lock();
-			//data_ = buffer.allocate(size);
+			wdata_ = buffer.allocate(size);
+			data_ = buffer.data();
 			write_ = true;
 		}
 
+		Handle(const Handle& h) = delete;
+
+		Handle(Handle&& h) noexcept: data_(h.data_), wdata_(h.wdata_),
+			buffer_(h.buffer_), write_(h.write_), locked_(true){
+			// don't unlock old object
+			h.locked_ = false;
+		}
+
 		~Handle() {
+			if(!locked_){
+				return;
+			}
 			if(write_){
 				buffer_.write_unlock();
 			}else{
@@ -78,6 +89,10 @@ public:
 			return data_;
 		}
 
+		T* wdata(){
+			return wdata_;
+		}
+
 		//operator[]
 		//operator*
 	};
@@ -86,18 +101,17 @@ public:
 
 	Buffer(const size_t);
 	Buffer(const Buffer& b) = delete;
-	Buffer(Buffer&& b): v_buffer(std::move(b.v_buffer)), size_(std::move(b.size_)){};
-	//Buffer& operator=(Buffer&& b){ v_buffer = std::move(b.v_buffer); size = std::move(b.size);  return *this; };
+	Buffer(Buffer&& b): v_buffer(std::move(b.v_buffer)), size_(std::move(b.size_)), offset(std::move(b.offset)){};
 
 	bool new_data;
 
 	std::unique_lock<std::shared_mutex> lock();
 
-	void write(T buf[], const size_t);
+	void write(const T buf[], const size_t);
 	void write(const std::vector<T>& buf);
-	void write_offset(T buf[], const size_t, const size_t, const size_t);
-	void write_offset(const std::vector<T>& buf, const size_t, const size_t);
 	void resize(const size_t);
+
+	T* allocate(const unsigned);
 
 	size_t bsize() const {
 		return size_ * sizeof(T);
@@ -108,20 +122,15 @@ public:
 	}
 
 	const T* data() const {
-		return v_buffer.data();
+		return v_buffer.data() + offset;
 	}
 
-	const Handle map_read() {
+	Handle map_read() {
 		return Handle(*this);
 	}
 
-	const Handle map_write(unsigned size) {
+	Handle map_write(unsigned size) {
 		return Handle(*this, size);
-	}
-
-
-	const decltype(v_buffer)& vector() const {
-		return v_buffer;
 	}
 };
 
@@ -133,6 +142,8 @@ struct Buffers{
 	std::mutex mut;
 
 	Buffers():bufs(), mut(){};
+
+	void write(T buf[], size_t data_size);
 };
 
 template class Buffer<int16_t>;

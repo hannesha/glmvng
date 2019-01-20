@@ -22,7 +22,6 @@
 #include <stdexcept>
 #include <iostream>
 
-
 namespace PA{
 	struct Lock{
 		explicit Lock(pa_threaded_mainloop* m) : mainloop(m){
@@ -208,14 +207,9 @@ void Pulse_Async::stream_state_cb(pa_stream* stream, void* userdata){
 
 // internal read function
 template<typename T>
-static void i_read(std::vector<Buffer<T>>& buffers, T buf[], size_t size){
+static void i_read(typename Buffers<T>::Ptr& buffers, T buf[], size_t size){
 	size = size / sizeof(T);
-	if(buffers.size() > 1){
-		buffers[0].write_offset(buf, size, 2, 0);
-		buffers[1].write_offset(buf, size, 2, 1);
-	}else{
-		buffers[0].write(buf, size);
-	}
+	buffers->write(buf, size);
 }
 
 void Pulse_Async::stream_read_cb(pa_stream* stream, size_t len, void* userdata){
@@ -231,7 +225,7 @@ void Pulse_Async::stream_read_cb(pa_stream* stream, size_t len, void* userdata){
 		if(buf){
 			// lock buffer vector, read stream buffer into audio buffers
 			std::lock_guard<std::mutex> lock(data->p_buffers->mut);
-			i_read(data->p_buffers->bufs, buf, len);
+			i_read(data->p_buffers, buf, len);
 		}
 
 		// drop stream buffer
