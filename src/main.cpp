@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 	FFT fft(cfg.input.fft_size);
 	std::vector<Magnitudes> mags(1, Magnitudes(cfg.input.fft_size));
 	// create processing buffer
-	Processing::GravityInfo gravity_info(cfg.input.fft_size);
+	Processing::GravityInfo gravity_info(cfg.input.fft_size, {0, 10});
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
