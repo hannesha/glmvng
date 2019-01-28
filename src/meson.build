@@ -13,8 +13,13 @@ foreach f: files
 	src += f + '.cpp'
 endforeach
 
+
 args = []
 args += '-DWITH_SIMD'
 args += '-fopenmp'
 
 glmvng = executable('glmvng', src, dependencies: deps, cpp_args: args)
+
+buffer_src = files('Buffer.cpp')
+src_dir = include_directories('.')
+subdir('tests')
