@@ -45,19 +45,25 @@ int main(int argc, char *argv[]) {
 
 	Config cfg(config_file);
 
-	// init buffers
-	std::shared_ptr<DrawBuffer> draw_buf = std::make_shared<DrawBuffer>();
-	GLDEBUG;
-	Renderer rend(cfg.renderers[0], draw_buf);
-	GLDEBUG;
 	// create audio buffer
 	Buffers<float>::Ptr bufs(new Buffers<float>());
 	bufs->bufs.emplace_back(cfg.input.buffer_len);
+	if(cfg.input.stereo){
+		bufs->bufs.emplace_back(cfg.input.buffer_len);
+	}
+	// init buffers
+	std::shared_ptr<DrawBuffer> draw_buf = std::make_shared<DrawBuffer>();
+	GLDEBUG;
+	std::vector<Renderer> renderers;
+	for(auto& rconfig : cfg.renderers){
+		renderers.emplace_back(rconfig, draw_buf);
+		GLDEBUG;
+	}
+
 	// init fft
-	FFT fft(cfg.input.fft_size);
+	std::vector<std::tuple<FFT, Processing::GravityInfo>> processing_data;
+	processing_data.emplace_back(FFT(cfg.input.fft_size), Processing::GravityInfo(cfg.input.fft_size, {0, 10}));
 	std::vector<Magnitudes> mags(1, Magnitudes(cfg.input.fft_size));
-	// create processing buffer
-	Processing::GravityInfo gravity_info(cfg.input.fft_size, {0, 10});
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -78,24 +84,30 @@ int main(int argc, char *argv[]) {
 		old_rms = old_rms * (1.f - rms_mix) + rms * rms_mix;
 		// set rms
 		ShaderConfig::value_type vrms = {"rms", Scalar(old_rms)};
-		rend.set_uniform(vrms);
+		for(auto& renderer : renderers){
+			renderer.set_uniform(vrms);
+		}
 		// update buffer
 		draw_buf->update(bufs->bufs);
 
 		// calulate spectrum
-		fft.calculate(bufs->bufs[0]);
-		// processing
-		fft.magnitudes(mags[0], 1);
 		const float dt = 0.016;
 		const float gravity = 1;
-		Processing::calculate_gravity(mags[0], gravity_info, gravity, dt);
+		for(unsigned i = 0; i < mags.size(); i++){
+			auto& p = processing_data[i];
+			std::get<0>(p).calculate(bufs->bufs[i]);
+			std::get<0>(p).magnitudes(mags[i], 1);
+			Processing::calculate_gravity(mags[i], std::get<1>(p), gravity, dt);
+		}
 
 		// update buffer
 		draw_buf->update_fft(mags);
 
 		// draw
 		glClear(GL_COLOR_BUFFER_BIT);
-		rend.draw();
+		for(auto& renderer : renderers){
+			renderer.draw();
+		}
 
 		window.swapBuffers();
 	}
