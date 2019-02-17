@@ -39,8 +39,15 @@ namespace xdg{
 	std::string default_config_home(){
 		std::string config_home;
 		// get default config directory
-		struct passwd* pw = ::getpwuid(::getuid());
-		config_home = pw->pw_dir;
+		const char* env_home = std::getenv("HOME");
+		if(env_home != nullptr){
+			config_home = env_home;
+		}else{
+			struct passwd* pw = ::getpwuid(::geteuid());
+			if(pw){
+				config_home = pw->pw_dir;
+			}
+		}
 		config_home += "/.config";
 
 		return config_home;
