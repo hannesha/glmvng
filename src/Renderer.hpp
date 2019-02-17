@@ -15,9 +15,13 @@ public:
 	Renderer(const RenderConfig&, std::shared_ptr<DrawBuffer>&);
 	~Renderer(){};
 
+	Renderer(const Renderer&) = delete;
+	Renderer(Renderer&&) = default;
+
 	void draw();
 
 	void set_uniform(const ShaderConfig::value_type& val){
+		shader();
 		set_uniform(val, shader);
 	}
 

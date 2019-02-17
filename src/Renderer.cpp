@@ -52,6 +52,7 @@ GLDEBUG;
 void Renderer::set_uniform(const ShaderConfig::value_type& val, GL::Program& sh) {
 	GLint loc = sh.get_uniform(val.first.c_str());
 	//std::cout << loc << std::endl;
+GLDEBUG;
 	if(loc < 0) {
 		// log unused value
 		//std::cout << "Ignoring: " << val.first << std::endl;
@@ -62,13 +63,13 @@ void Renderer::set_uniform(const ShaderConfig::value_type& val, GL::Program& sh)
 	case Scalar::Type::INT:
 		//std::cout << "loc: " << loc << " setting int: " << val.first << std::endl;
 		glUniform1i(loc, val.second.value.i);
-		GL::get_error("set int");
+GLDEBUG;
 		break;
 
 	case Scalar::Type::FLOAT:
 		//std::cout << "loc: " << loc << " setting float: " << val.first << std::endl;
 		glUniform1f(loc, val.second.value.f);
-		GL::get_error("set float");
+GLDEBUG;
 		break;
 
 	default:
