@@ -76,7 +76,16 @@ void Config::reload(){
 
 RenderConfig Config::parse_renderer(const std::string& path){
 	RenderConfig config;
-	std::string shader_path("shaders/");
+
+	auto config_dir_end = file.rfind("/");
+	if(config_dir_end == std::string::npos){
+		config_dir_end = 0;
+	} else {
+		config_dir_end++;
+	}
+
+	std::string shader_path(file, 0, config_dir_end);
+	shader_path += "shaders/";
 	//TODO check output size
 
 	libconfig::Setting& cfg_shaders = cfg.lookup(path + ".shaders");

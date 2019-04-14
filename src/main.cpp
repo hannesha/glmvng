@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 	glClear(GL_COLOR_BUFFER_BIT);
 	window.swapBuffers();
 
-	std::string config_file = "config";
+	std::string config_file;
 
 	if(argc > 1){
 		config_file = argv[1];
