@@ -1,5 +1,10 @@
 #include "Processing.hpp"
 
+#pragma omp declare simd
+inline float square(float x){
+	return x*x;
+}
+
 // calculate the rms value of all the audio data in the buffer
 template <typename T>
 float Processing::rms(Buffer<T>& buffer){
@@ -9,27 +14,11 @@ float Processing::rms(Buffer<T>& buffer){
 	float rms = 0;
 	unsigned i = 0;
 
-	constexpr unsigned N = 4;
-	// temp sum vector
-	alignas(16) std::array<float,N> vrms;
-	for(unsigned k=0; k<N; k++) vrms[k] = 0;
-
-	for(; i < size/N; i++){
-		// load 4 integers and convert them to float
-		alignas(16) std::array<float, N> vdata;
-		for(unsigned k=0; k<N; k++) vdata[k] = static_cast<float>(data[i*N + k]);
-
-		#pragma omp simd
-		for(unsigned k=0; k<N; k++) vrms[k] += vdata[k] * vdata[k];
+	#pragma omp simd reduction(+:rms)
+	for(i = 0; i < size; i++){
+		rms += square(data[i]);
 	}
-	// calculate sum
-	for(unsigned k=0; k<N; k++) rms += vrms[k];
 
-	// calculate remaining values
-	i *= N;
-	for(; i < size; i++){
-		 rms += data[i] * data[i];
-	}
 	return rms;
 }
 
