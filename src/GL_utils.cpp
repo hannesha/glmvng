@@ -59,7 +59,7 @@ Shader::Shader(const char* code, GLuint type) {
 	}
 }
 
-void GL::get_error(const char* str) {
+void GL::get_error(const char* str, const char* function) {
 	GLenum err = glGetError();
 	std::string err_str;
 
@@ -88,7 +88,12 @@ void GL::get_error(const char* str) {
 		return;
 	}
 
-	std::cout << str << " :" << err_str << std::endl;
+	if(!function){
+		std::cout << str << " :" << err_str << std::endl;
+	}else{
+		std::cout << str << " in: " << function << " :" << err_str << std::endl;
+	}
+
 }
 
 void GL::init() {

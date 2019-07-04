@@ -18,7 +18,7 @@
 #define GLDEBUG_S(x) #x
 #define GLDEBUG_S_(x) GLDEBUG_S(x)
 #define GLDEBUGSTRING "GL: err " __FILE__ ", line " GLDEBUG_S_(__LINE__)
-#define GLDEBUG GL::get_error(GLDEBUGSTRING)
+#define GLDEBUG GL::get_error(GLDEBUGSTRING, __PRETTY_FUNCTION__)
 
 namespace GL {
 //! Buffer RAII wrapper
@@ -238,7 +238,7 @@ struct FBO {
 	Print error message if an opengl error occured.
 	\param str error message that gets printed
 */
-void get_error(const char*);
+void get_error(const char*, const char* function = nullptr);
 
 //! Initialize GL context
 void init();
