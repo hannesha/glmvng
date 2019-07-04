@@ -35,4 +35,5 @@ private:
 	void link_shaders(const RenderConfig::Shaders&);
 	void configure();
 	void set_uniform(const ShaderConfig::value_type& val, GL::Program& sh);
+	void set_vector(const ShaderVectors::value_type&, GL::Program&);
 };

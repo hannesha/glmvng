@@ -9,7 +9,7 @@ in vec4 v_top_color[];
 out vec4 color;
 
 uniform float output_size_1;
-const float bwidth = 0.5;
+uniform float bwidth = 0.5;
 //uniform mat4 trans;
 
 void main () {

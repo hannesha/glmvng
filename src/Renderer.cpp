@@ -77,6 +77,19 @@ GLDEBUG;
 	}
 }
 
+void Renderer::set_vector(const ShaderVectors::value_type& vec, GL::Program& sh) {
+	GLint loc = sh.get_uniform(vec.first.c_str());
+	//std::cout << loc << std::endl;
+GLDEBUG;
+	if(loc < 0) {
+		// log unused value
+		//std::cout << "Ignoring: " << val.first << std::endl;
+		return;
+	}
+
+	glUniform4fv(loc, 1, vec.second.data());
+}
+
 void Renderer::configure(){
 	shader();
 	// set texture buffer locations
@@ -87,6 +100,10 @@ void Renderer::configure(){
 
 	for(auto& uniform : renderconfig.uniforms){
 		set_uniform(uniform, shader);
+	}
+GLDEBUG;
+	for(auto& vector : renderconfig.vectors){
+		set_vector(vector, shader);
 	}
 GLDEBUG;
 }

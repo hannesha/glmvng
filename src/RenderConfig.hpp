@@ -21,6 +21,7 @@ struct RenderConfig{
 	GLenum drawtype = GL_LINE_STRIP;
 	// Shaderconfig
 	ShaderConfig uniforms;
+	ShaderVectors vectors;
 
 	//TODO use shader map instead and store the keys in that vector
 	Shaders shaders;

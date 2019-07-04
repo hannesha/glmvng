@@ -86,7 +86,6 @@ RenderConfig Config::parse_renderer(const std::string& path){
 
 	std::string shader_path(file, 0, config_dir_end);
 	shader_path += "shaders/";
-	//TODO check output size
 
 	libconfig::Setting& cfg_shaders = cfg.lookup(path + ".shaders");
 	if(!cfg_shaders.isArray()){
@@ -103,11 +102,10 @@ RenderConfig Config::parse_renderer(const std::string& path){
 		config.output_size = input.buffer_len;
 	}
 	config.drawtype = parse_drawtype(cfg.lookup(path + ".drawtype"));
-		
-	ShaderConfig uniforms;
-	parse_uniforms(cfg.lookup(path + ".uniforms"), uniforms);
-	uniforms.emplace("output_size_1", 1.f/config.output_size);
-	config.uniforms = uniforms;
+
+	parse_uniforms(cfg.lookup(path + ".uniforms"), config.uniforms);
+	parse_uniform_vectors(cfg.lookup(path + ".uniforms.vectors"), config.vectors);
+	config.uniforms.emplace("output_size_1", 1.f/config.output_size);
 	return config;
 }
 
@@ -196,6 +194,39 @@ void Config::parse_uniforms(libconfig::Setting& root, ShaderConfig& sh_config){
 		std::string name = s.getName();
 		sh_config.emplace(name, setting_to_scalar(s));
 	}
+}
+
+void Config::parse_uniform_vectors(libconfig::Setting& root, ShaderVectors& vectors){
+	for(auto& s : root){
+		try{
+			Vec4 color = parse_color(s);
+			std::string name = s.getName();
+			vectors.emplace(name, color);
+		}catch(std::logic_error& e){
+			continue;
+		}
+	}
+}
+
+Vec4 Config::parse_color(libconfig::Setting& setting){
+	Vec4 cres; 
+	std::string color;
+	color = setting.c_str();
+	if(color[0] == '#'){
+		color = color.substr(1);
+	}
+	long value = std::stol(color, nullptr, 16);
+	if(color.length() == 8){
+		// color with alpha value
+		cres[3] = static_cast<float>((value / 0x1000000) % 0x100) / 255.;
+	}else{
+		// opaque color
+		cres[3] = 1;
+	}
+	cres[0] = static_cast<float>((value / 0x10000) % 0x100) / 255.;
+	cres[1] = static_cast<float>((value / 0x100) % 0x100) / 255.;
+	cres[2] = static_cast<float>(value % 0x100) / 255.;
+	return cres;
 }
 
 void Config::parse_input(Module_Config::Input& i, const std::string& path){

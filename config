@@ -4,11 +4,12 @@ slope = 1.
 Input = {
 	buffer_duration = 50;
 	f_sample = 48000;
+	fft_size = 2048;
 }
 
 Renderer1: {
 	shaders = ["simple.frag", "bar.vert", "bar.geom"];
-	output_size = 100;
+	output_size = 70;
 	drawtype = "points";
 
 	uniforms = {
@@ -16,5 +17,9 @@ Renderer1: {
 		width = 0.01;
 		sigma = 1.3;
 		sigma_coeff = 3.0;
+		vectors = {
+			bot_color = "#ba55d3";
+			top_color = "#ba55d3";
+		}
 	}
 }

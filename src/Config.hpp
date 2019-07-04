@@ -31,6 +31,8 @@ class Config {
 		GLenum parse_drawtype(const char*);
 		static bool rfind(const std::string&, const std::string&);
 		void parse_uniforms(libconfig::Setting&, ShaderConfig&);
+		void parse_uniform_vectors(libconfig::Setting&, ShaderVectors&);
+		Vec4 parse_color(libconfig::Setting&);
 		void parse_input(Module_Config::Input&, const std::string&);
 		std::shared_ptr<GL::Shader> load_shader(const std::string& path);
 		
