@@ -103,8 +103,11 @@ RenderConfig Config::parse_renderer(const std::string& path){
 	}
 	config.drawtype = parse_drawtype(cfg.lookup(path + ".drawtype"));
 
-	parse_uniforms(cfg.lookup(path + ".uniforms"), config.uniforms);
-	parse_uniform_vectors(cfg.lookup(path + ".uniforms.vectors"), config.vectors);
+	try{
+		parse_uniforms(cfg.lookup(path + ".uniforms"), config.uniforms);
+		parse_uniform_vectors(cfg.lookup(path + ".uniforms.vectors"), config.vectors);
+	} catch (libconfig::SettingNotFoundException& e) {}
+
 	config.uniforms.emplace("output_size_1", 1.f/config.output_size);
 	return config;
 }
@@ -198,9 +201,13 @@ void Config::parse_uniforms(libconfig::Setting& root, ShaderConfig& sh_config){
 
 void Config::parse_uniform_vectors(libconfig::Setting& root, ShaderVectors& vectors){
 	for(auto& s : root){
+		std::string name = s.getName();
+		if(name.rfind("_color") == std::string::npos){
+			// TODO parse vector
+			continue;
+		}
 		try{
 			Vec4 color = parse_color(s);
-			std::string name = s.getName();
 			vectors.emplace(name, color);
 		}catch(std::logic_error& e){
 			continue;
