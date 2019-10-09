@@ -12,6 +12,7 @@
 #include "Pulse_Async.hpp"
 #include "Processing.hpp"
 #include "FFT.hpp"
+#include "Multisampler.hpp"
 
 #include <cmath>
 #include <csignal>
@@ -24,10 +25,14 @@ void sigint_handler(int signal){
 }
 
 int main(int argc, char *argv[]) {
+	const int samples = 4;
 	std::signal(SIGINT, sigint_handler);
 	auto window = GLXwindow();
+	GL::Multisampler multisample(samples, window.getWidth(), window.getHeight());
+	glEnable(GL_MULTISAMPLE);
 
 	window.setTitle("window title");
+	window.setResizeCallback([&](int w, int h){multisample.resize(samples, w, h);});
 
 	// load extensions
 	GL::init();
@@ -104,10 +109,13 @@ int main(int argc, char *argv[]) {
 		draw_buf->update_fft(mags);
 
 		// draw
+		multisample.bind();
 		glClear(GL_COLOR_BUFFER_BIT);
 		for(auto& renderer : renderers){
 			renderer.draw();
 		}
+
+		multisample.blit(window.getWidth(), window.getHeight());
 
 		window.swapBuffers();
 	}

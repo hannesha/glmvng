@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -30,6 +31,8 @@ class GLXwindow {
 	public:
 		GLXwindow();
 		~GLXwindow();
+
+		using CBFunction = std::function<void(int, int)>;
 
 		// extension string helper
 		static bool hasExt(const std::string& exts, const std::string& ext){
@@ -41,12 +44,20 @@ class GLXwindow {
 		bool shouldClose();
 
 		void setTitle(const std::string&);
+		void setResizeCallback(const CBFunction& cb){
+			callback = cb;
+		}
+
+		const int getWidth(){ return width; }
+		const int getHeight(){ return height; }
 
 private:
 		int width, height;
 		Atom wm_delete_window;
 		bool should_close = false;
 		std::string glx_exts;
+
+		CBFunction callback;
 
 		// resource wrappers
 		template<typename T>

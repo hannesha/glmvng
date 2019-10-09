@@ -71,6 +71,7 @@ void GLXwindow::pollEvents(){
 				width = wattr.width;
 				height = wattr.height;
 
+				callback(width, height);
 				glViewport(0, 0, width, height);
 			}
 			break;
@@ -86,7 +87,7 @@ bool GLXwindow::shouldClose(){
 	return should_close;
 }
 
-GLXwindow::GLXwindow(){
+GLXwindow::GLXwindow(): callback([](int w, int h){}){
 	display = XOpenDisplay(nullptr);
 	if(display == nullptr){
 		throw std::runtime_error("Can't open display!");

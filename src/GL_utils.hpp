@@ -199,10 +199,13 @@ struct Texture {
 	inline Texture() noexcept { glGenTextures(1, &id); };
 	inline ~Texture() noexcept { glDeleteTextures(1, &id); };
 	//! move ctor
-	Texture(Texture&& t) noexcept: id(t.id) { t.id = 0; };
+	Texture(Texture&& t) noexcept: Texture() { std::swap(id, t.id); };
 
 	Texture(const Texture&) = delete; //!< disable copying
-	Texture& operator=(Texture&&) = default; //!< move assignment
+	Texture& operator=(Texture&& t) { //!< move assignment
+		std::swap(id, t.id);
+		return *this;
+	};
 
 	inline void bind(GLenum target) const noexcept { glBindTexture(target, id); };
 	inline void operator()(GLenum target) const noexcept { bind(target); };
@@ -217,10 +220,15 @@ struct FBO {
 	inline FBO() noexcept { glGenFramebuffers(1, &id); };
 	inline ~FBO() noexcept { glDeleteFramebuffers(1, &id); };
 	//! move ctor
-	FBO(FBO&& t) noexcept: id(t.id) { t.id = 0; };
+	FBO(FBO&& t) noexcept : FBO() {
+		std::swap(id, t.id);
+	};
 
 	FBO(const FBO&) = delete; //!< disable copying
-	FBO& operator=(FBO&&) = default; //!< move assignment
+	FBO& operator=(FBO&& t){ //!< move assignment
+		std::swap(id, t.id);
+		return *this;
+	};
 
 	inline void bind() const noexcept { bind(GL_FRAMEBUFFER); };
 	inline void operator()() const noexcept { bind(); };
