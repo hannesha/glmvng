@@ -54,6 +54,7 @@ Shader::Shader(const char* code, GLuint type) {
 		glGetShaderInfoLog(id, length, &length, log.data());
 
 		std::string err(log.begin(), log.end());
+		err = "Shader Error: " + err;
 		//std::cout << err << std::endl;
 		throw std::invalid_argument(err);
 	}
