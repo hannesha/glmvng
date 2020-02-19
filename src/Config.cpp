@@ -109,6 +109,7 @@ RenderConfig Config::parse_renderer(const std::string& path){
 	} catch (libconfig::SettingNotFoundException& e) {}
 
 	config.uniforms.emplace("output_size_1", 1.f/config.output_size);
+	config.uniforms.emplace("buffer_size", (int)input.buffer_len);
 	return config;
 }
 

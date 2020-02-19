@@ -1,0 +1,21 @@
+testf = 1.
+slope = 1.
+
+Input = {
+	buffer_duration = 50;
+	f_sample = 48000;
+}
+
+Renderer1: {
+	//shaders = ["osc.frag", "osc_ring.vert", "osc.geom"]; //ring oscilloscope
+	shaders = ["osc.frag", "osc.vert", "osc.geom"];
+	output_size = 1000;
+	drawtype = "line strip";
+
+	uniforms = {
+		scale = 1.2;
+		width = 0.01;
+		sigma = 1.3;
+		sigma_coeff = 3.0;
+	}
+}
