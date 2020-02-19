@@ -25,13 +25,22 @@ void sigint_handler(int signal){
 }
 
 int main(int argc, char *argv[]) {
+	std::string config_file;
+
+	if(argc > 1)
+		config_file = argv[1];
+
 	const int samples = 4;
 	std::signal(SIGINT, sigint_handler);
 	auto window = GLXwindow();
 	GL::Multisampler multisample(samples, window.getWidth(), window.getHeight());
 	glEnable(GL_MULTISAMPLE);
 
-	window.setTitle("window title");
+	if(config_file.empty()){
+		window.setTitle("GLMVNG");
+	}else{
+		window.setTitle("GLMVNG: " + config_file);
+	}
 	window.setResizeCallback([&](int w, int h){multisample.resize(samples, w, h);});
 
 	// load extensions
@@ -42,11 +51,6 @@ int main(int argc, char *argv[]) {
 	glClear(GL_COLOR_BUFFER_BIT);
 	window.swapBuffers();
 
-	std::string config_file;
-
-	if(argc > 1){
-		config_file = argv[1];
-	}
 
 	Config cfg(config_file);
 
