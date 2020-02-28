@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 	do{
 		window.pollEvents();
 		// calculate rms
-		float rms = std::sqrt(Processing::rms(bufs->bufs[0]) / bufs->bufs[0].size());
+		float rms = Processing::rms(bufs->bufs[0]);
 		old_rms = old_rms * (1.f - rms_mix) + rms * rms_mix;
 		// set rms
 		ShaderConfig::value_type vrms = {"rms", Scalar(old_rms)};
