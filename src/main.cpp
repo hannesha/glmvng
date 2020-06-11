@@ -33,8 +33,10 @@ int main(int argc, char *argv[]) {
 	const int samples = 4;
 	std::signal(SIGINT, sigint_handler);
 	auto window = GLXwindow();
+	//auto window = GLFWWindow();
 	GL::Multisampler multisample(samples, window.getWidth(), window.getHeight());
 	glEnable(GL_MULTISAMPLE);
+	glDisable(GL_FRAMEBUFFER_SRGB);
 
 	if(config_file.empty()){
 		window.setTitle("GLMVNG");
