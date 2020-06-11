@@ -1,5 +1,6 @@
 #include "Renderer.hpp"
 #include "Drawbuffer.hpp"
+#include <iostream>
 
 Renderer::Renderer(const RenderConfig& renderconf, std::shared_ptr<DrawBuffer>& draw_buf): renderconfig(renderconf), drawbuffer(draw_buf)
 {
@@ -59,22 +60,21 @@ GLDEBUG;
 		return;
 	}
 
-	switch(val.second.type) {
-	case Scalar::Type::INT:
-		//std::cout << "loc: " << loc << " setting int: " << val.first << std::endl;
-		glUniform1i(loc, val.second.value.i);
-GLDEBUG;
-		break;
-
-	case Scalar::Type::FLOAT:
-		//std::cout << "loc: " << loc << " setting float: " << val.first << std::endl;
-		glUniform1f(loc, val.second.value.f);
-GLDEBUG;
-		break;
-
-	default:
-		std::cout << "ignoring value: " << val.first << std::endl;
-	}
+	std::visit([&](auto&& value) {
+		using T = std::decay_t<decltype(value)>;
+		if constexpr (std::is_same_v<T, int>)
+		{
+			//std::cout << "loc: " << loc << " setting int: " << value << std::endl;
+			glUniform1i(loc, value);
+			GLDEBUG;
+		}
+		else
+		{
+			//std::cout << "loc: " << loc << " setting float: " << value << std::endl;
+			glUniform1f(loc, value);
+			GLDEBUG;
+		}
+	}, val.second);
 }
 
 void Renderer::set_vector(const ShaderVectors::value_type& vec, GL::Program& sh) {

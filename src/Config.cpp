@@ -163,7 +163,7 @@ Scalar Config::setting_to_scalar(libconfig::Setting& s) {
 		return Scalar(static_cast<int>(s));
 
 	case libconfig::Setting::TypeInt64:
-		return Scalar(static_cast<long long>(s));
+		return Scalar(static_cast<int>(s));
 
 	default:
 		throw std::invalid_argument("Wrong setting type");
