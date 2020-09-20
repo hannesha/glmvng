@@ -7,18 +7,18 @@
 #include <stdexcept>
 #include "Utils.hpp"
 
-const std::string CONFIG_FOLDER("/glmvng/");
+const std::filesystem::path CONFIG_FOLDER("glmvng");
 const std::string CONFIG_FILE("config");
-const std::string CONFIG_PATH(CONFIG_FOLDER + CONFIG_FILE);
-const std::string DEFAULT_CONFIG_PATH("/etc" + CONFIG_FOLDER + CONFIG_FILE);
+const std::filesystem::path CONFIG_PATH(CONFIG_FOLDER / CONFIG_FILE);
+const std::filesystem::path DEFAULT_CONFIG_PATH("/etc" / CONFIG_FOLDER / CONFIG_FILE);
 
 
 Config::Config(const std::string& config_file){
 	if(!config_file.empty()){
-		if(xdg::verify_path(config_file)){
+		if(std::filesystem::exists(config_file)){
 			file = config_file;
 		}else{
-			file = xdg::find_config(CONFIG_FOLDER + config_file);
+			file = xdg::find_config(CONFIG_FOLDER / config_file);
 			if (file.empty()){
 				std::cerr << "The specified config file doesn't exist, falling back to default config!" << std::endl;
 			}

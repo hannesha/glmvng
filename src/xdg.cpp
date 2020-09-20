@@ -25,18 +25,16 @@
 #include <sstream>
 #include <cstdlib>
 
+#include <filesystem>
+
+using std::filesystem::path;
+using std::filesystem::exists;
+using std::string;
+
+constexpr char* xdg_config_dirs_default = "/etc/xdg";
+
 namespace xdg{
-	std::string config_home(){
-		std::string config_home;
-		const char* cxdg_cfg_home = std::getenv("XDG_CONFIG_HOME");
-		if(cxdg_cfg_home != nullptr){
-			config_home = cxdg_cfg_home;
-		}
-
-		return config_home;
-	}
-
-	std::string default_config_home(){
+	path default_config_home(){
 		std::string config_home;
 		// get default config directory
 		const char* env_home = std::getenv("HOME");
@@ -46,6 +44,8 @@ namespace xdg{
 			struct passwd* pw = ::getpwuid(::geteuid());
 			if(pw){
 				config_home = pw->pw_dir;
+			}else{
+				return "";
 			}
 		}
 		config_home += "/.config";
@@ -53,50 +53,54 @@ namespace xdg{
 		return config_home;
 	}
 
-	std::vector<std::string> config_dirs(){
-		std::string config_dirs;
-		const char* cxdg_cfg_dirs = std::getenv("XDG_CONFIG_DIRS");
-		if(cxdg_cfg_dirs != nullptr){
-			config_dirs = cxdg_cfg_dirs;
+	path config_home(){
+		path config_home;
+		const char* cxdg_cfg_home = std::getenv("XDG_CONFIG_HOME");
+		if(cxdg_cfg_home != nullptr){
+			config_home = cxdg_cfg_home;
 		}
 
-		std::vector<std::string> dirs;
+		if(config_home.empty())
+			config_home = default_config_home();
+
+		return config_home;
+	}
+
+	std::vector<path> config_dirs(){
+		std::string config_dirs;
+
+		const char* cxdg_cfg_dirs = std::getenv("XDG_CONFIG_DIRS");
+		if(cxdg_cfg_dirs != nullptr)
+			config_dirs = cxdg_cfg_dirs;
+
+		if(config_dirs.empty())
+			config_dirs = xdg_config_dirs_default;
+
+		std::vector<path> dirs;
 		std::istringstream ss(config_dirs);
 		std::string dir;
 
 		while(std::getline(ss, dir, ':')){
-			dirs.push_back(dir);
+			path directory = dir;
+
+			if(directory.is_absolute())
+				dirs.push_back(directory);
 		}
 
 		return dirs;
 	}
-	
-	std::string default_config_dir(){ return "/etc/xdg"; }
 
-	bool verify_path(const std::string& path){
-		std::ifstream file(path);
-		return file.good();
-	}
-
-	std::string find_config(const std::string& path){
-		std::string config;
+	path find_config(const path& cfg_file){
+		path config;
 		// check XDG_CONFIG_HOME
-		config = config_home() + path;
-		if(verify_path(config)) return config;
-
-		// use default value for XDG_CONFIG_HOME
-		config = default_config_home() + path;
-		if(verify_path(config)) return config;
+		config = config_home() / cfg_file;
+		if(exists(config)) return config;
 
 		// check XDG_CONFIG_DIRS
-		for(std::string& dir : config_dirs()){
-			config = dir + path;
-			if(verify_path(config)) return config;
+		for(auto& dir : config_dirs()){
+			config = dir / cfg_file;
+			if(exists(config)) return config;
 		}
-
-		// check XDG_CONFIG_DIRS default value
-		config = default_config_dir() + path;
-		if(verify_path(config)) return config;
 
 		// return empty string if no config file was found
 		return "";

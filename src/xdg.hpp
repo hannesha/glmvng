@@ -21,13 +21,11 @@
 
 #include <string>
 #include <vector>
+#include <filesystem>
 
 namespace xdg{
-	std::string config_home();
-	std::string default_config_home();
-	std::vector<std::string> config_dirs();
-	std::string default_config_dir();
-	bool verify_path(const std::string&);
+	std::filesystem::path config_home();
+	std::vector<std::filesystem::path> config_dirs();
 
-	std::string find_config(const std::string&);
+	std::filesystem::path find_config(const std::filesystem::path&);
 }
