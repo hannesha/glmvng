@@ -49,28 +49,25 @@ constexpr size_t ptr_sizeof(T t){
 }
 
 FFT::FFT(const size_t fft_size): size(fft_size){
-	input = reinterpret_cast<decltype(input)>(fftwf_malloc(ptr_sizeof(input) * size));
-	output = reinterpret_cast<decltype(output)>(fftwf_malloc(ptr_sizeof(output) * output_size()));
-	plan = fftwf_plan_dft_r2c_1d(size, input, reinterpret_cast<fftwf_complex*>(output), FFTW_ESTIMATE);
+	input.reset(new Input_t[size]);
+	output.reset(new Output_t[output_size()]);
+	plan = fftwf_plan_dft_r2c_1d(size, input.get(), reinterpret_cast<fftwf_complex*>(output.get()), FFTW_ESTIMATE);
 }
 
 FFT::FFT(FFT&& f){
-	input = f.input;
-	output = f.output;
 	plan = f.plan;
 	window = std::move(f.window);
 	size = f.size;
 
+	input = std::move(f.input);
+	output = std::move(f.output);
+
 	// invalidate pointers
-	f.input = nullptr;
-	f.output = nullptr;
 	f.plan = nullptr;
 	f.size = 0;
 }
 
 FFT::~FFT(){
-	if (output != nullptr) fftwf_free(output);
-	if (input != nullptr) fftwf_free(input);
 	if (plan != nullptr) fftwf_destroy_plan(plan);
 }
 
@@ -79,13 +76,12 @@ void FFT::resize(const size_t nsize){
 		size = nsize;
 		// destroy old plan and free memory
 		fftwf_destroy_plan(plan);
-		fftwf_free(input);
-		fftwf_free(output);
+
+		input.reset(new Input_t[size]);
+		output.reset(new Output_t[output_size()]);
 
 		// create new plan and allocate memory
-		input = reinterpret_cast<decltype(input)>(fftwf_malloc(ptr_sizeof(input) * size));
-		output = reinterpret_cast<decltype(output)>(fftwf_malloc(ptr_sizeof(output) * output_size()));
-		plan = fftwf_plan_dft_r2c_1d(size, input, reinterpret_cast<fftwf_complex*>(output), FFTW_ESTIMATE);
+		plan = fftwf_plan_dft_r2c_1d(size, input.get(), reinterpret_cast<fftwf_complex*>(output.get()), FFTW_ESTIMATE);
 	}
 }
 

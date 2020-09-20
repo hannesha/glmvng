@@ -19,16 +19,19 @@
 
 #pragma once
 
-// Include FFTW3
 #include <fftw3.h>
 
 #include <complex>
+#include <memory>
 
 #include "Buffer.hpp"
 #include "Magnitudes.hpp"
 
 class FFT {
 	public:
+		using Input_t = float;
+		using Output_t = std::complex<Input_t>;
+
 		FFT(size_t);
 		// disable copy construction
 		FFT(const FFT&) = delete;
@@ -46,9 +49,9 @@ class FFT {
 		void magnitudes(Magnitudes&, float);
 		size_t output_size();
 
-		std::complex<float>* output;
+		std::unique_ptr<Output_t[]> output;
 	private:
-		float* input;
+		std::unique_ptr<Input_t[]> input;
 		fftwf_plan plan;
 		size_t size;
 
