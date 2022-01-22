@@ -8,6 +8,8 @@
 #endif
 
 #include <vector>
+#include <string>
+#include <map>
 
 /*!
 	\file
@@ -182,16 +184,27 @@ public:
 		\param name Uniform name
 		\return Uniform location
 	*/
-	inline GLint get_uniform(const char* name) const { return glGetUniformLocation(id, name); };
+	GLint get_uniform(const std::string& name) const {
+		auto result = uniform_cache.find(name);
+		if(result == uniform_cache.end()){
+			GLint location = glGetUniformLocation(id, name.c_str());
+			uniform_cache.emplace(name, location);
+			return location;
+		}
+		return result->second;
+	}
+
 	/*!
 		Get the attribute location of the specified attribute name.
 		\param name Attribute name
 		\return Attribute location
 	*/
-	inline GLint get_attrib(const char* name) const { return glGetAttribLocation(id, name); };
+	inline GLint get_attrib(const std::string& name) const { return glGetAttribLocation(id, name.c_str()); };
 
 private:
 	GLuint id; //!< Program handle
+
+	mutable std::map<std::string, GLint> uniform_cache;
 };
 
 //! Texture RAII wrapper

@@ -25,7 +25,7 @@ void Renderer::draw(){
 	shader();
 	vao();
 GLDEBUG;
-	
+
 	DrawBuffer::TextureHandles textures = drawbuffer->get_handles();
 	glActiveTexture(GL_TEXTURE0);
 	textures.t_left(GL_TEXTURE_BUFFER);
@@ -51,7 +51,7 @@ GLDEBUG;
 }
 
 void Renderer::set_uniform(const ShaderConfig::value_type& val, GL::Program& sh) {
-	GLint loc = sh.get_uniform(val.first.c_str());
+	GLint loc = sh.get_uniform(val.first);
 	//std::cout << loc << std::endl;
 GLDEBUG;
 	if(loc < 0) {
@@ -78,7 +78,7 @@ GLDEBUG;
 }
 
 void Renderer::set_vector(const ShaderVectors::value_type& vec, GL::Program& sh) {
-	GLint loc = sh.get_uniform(vec.first.c_str());
+	GLint loc = sh.get_uniform(vec.first);
 	//std::cout << loc << std::endl;
 GLDEBUG;
 	if(loc < 0) {
