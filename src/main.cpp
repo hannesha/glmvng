@@ -88,6 +88,8 @@ int main(int argc, char *argv[]) {
 	glClearColor(0.0, 0.0, 0.0, 0.8);
 	float old_rms = 0.5;
 	float rms_mix = 0.8;
+	std::chrono::time_point<std::chrono::steady_clock> t_last =
+		std::chrono::steady_clock::now();
 	do{
 		window.pollEvents();
 		// calculate rms
@@ -102,8 +104,12 @@ int main(int argc, char *argv[]) {
 		draw_buf->update(bufs->bufs);
 
 		// calulate spectrum
-		const float dt = 0.016;
 		const float gravity = 1;
+		std::chrono::time_point<std::chrono::steady_clock> t_now =
+			std::chrono::steady_clock::now();
+		float dt = std::chrono::duration<float>(t_now - t_last).count();
+		t_last = t_now;
+
 		for(unsigned i = 0; i < mags.size(); i++){
 			auto& p = processing_data[i];
 			std::get<0>(p).calculate(bufs->bufs[i]);
