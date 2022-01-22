@@ -2,25 +2,13 @@
 #include <numeric>
 #include <cmath>
 
-#pragma omp declare simd
-inline float square(float x){
-	return x*x;
-}
-
 // calculate the rms value of all the audio data in the buffer
 template <typename T>
 float Processing::rms(Buffer<T>& buffer){
 	auto lock = buffer.lock();
 	auto data = buffer.data();
 	auto size = buffer.size();
-	float rms = 0;
-	//unsigned i = 0;
-
-	//#pragma omp simd reduction(+:rms)
-	//for(i = 0; i < size; i++){
-	//	rms += square(data[i]);
-	//}
-	rms = std::transform_reduce(data, data + size, data, 0);
+	float rms = std::transform_reduce(data, data + size, data, 0.f);
 
 	return std::sqrt(rms / size);
 }
@@ -49,4 +37,4 @@ void Processing::calculate_gravity(Magnitudes& mag, GravityInfo& gravity_info, c
 }
 
 template float Processing::rms(Buffer<int16_t>&);
-template float Processing::rms<float>(Buffer<float>&);
+template float Processing::rms(Buffer<float>&);
