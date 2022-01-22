@@ -145,13 +145,17 @@ std::shared_ptr<GL::Shader> Config::load_shader(const std::string& path){
 		return shader->second;
 	}
 
-	// shader not found in map
-	auto shader_ptr = std::make_shared<GL::Shader>(
-		Utils::load_source(path).c_str(),
-		get_shader_type(path)
-	);
-	shaders.emplace(path, shader_ptr);
-	return shader_ptr;
+	try{
+		// shader not found in map
+		auto shader_ptr = std::make_shared<GL::Shader>(
+			Utils::load_source(path).c_str(),
+			get_shader_type(path)
+		);
+		shaders.emplace(path, shader_ptr);
+		return shader_ptr;
+	}catch(...){
+		std::throw_with_nested(std::runtime_error("Failed to process shader: " + path));
+	}
 }
 
 Scalar Config::setting_to_scalar(libconfig::Setting& s) {
