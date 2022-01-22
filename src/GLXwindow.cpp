@@ -20,30 +20,35 @@
 #include "GLXwindow.hpp"
 #include <iostream>
 #include <stdexcept>
+#include <memory>
 
-void GLXwindow::selectFBConfig(GLXFBConfig& fbconfig, Display* display, int visual_attribs[]){
+struct XFree_deleter{
+	void operator()(void* i) {XFree(i);}
+};
+
+template <typename T>
+using Xptr = std::unique_ptr<T, XFree_deleter>;
+
+void selectFBConfig(GLXFBConfig& fbconfig, Display* display, int visual_attribs[]){
 	int fbcount;
-	Xptr<GLXFBConfig> fbconfigs(glXChooseFBConfig(display, DefaultScreen(display), visual_attribs, &fbcount), (FN_del<GLXFBConfig>)XFree);
+	Xptr<GLXFBConfig[]> fbconfigs{glXChooseFBConfig(display, DefaultScreen(display), visual_attribs, &fbcount)};
 
-	//std::cout << fbcount << " matching fbconfigs" << std::endl;
-	int goodfb = -1;
+	//std::cout << fbcount << " matching fbconfigs" << std::endl
+	fbconfig = fbconfigs[0];
 	for(int i = 0; i<fbcount; i++){
-		Xptr<XVisualInfo> vi(glXGetVisualFromFBConfig(display, fbconfigs[i]), (FN_del<XVisualInfo>)XFree);
-		if(vi.is_valid()){
+		Xptr<XVisualInfo> vi(glXGetVisualFromFBConfig(display, fbconfigs[i]));
+		if(vi){
 			// check if visual has a 32bit framebuffer
 			if(vi->depth > 24){
-				goodfb = i;
+				fbconfig = fbconfigs[i];
+				std::cout << "found transparent VisualInfo with id: 0x" << std::hex << vi->visualid << std::dec << std::endl;
+				return;
 			}
 		}
 	}
 
-	if(goodfb >= 0){
-		// get matching fbconfig
-		fbconfig = fbconfigs[goodfb];
-	}else{
-		// use default fbconfig config
-		fbconfig = fbconfigs[0];
-	}
+	// use default fbconfig config
+	return;
 }
 
 void GLXwindow::setTitle(const std::string& title){
@@ -72,7 +77,6 @@ void GLXwindow::pollEvents(){
 				height = wattr.height;
 
 				callback(width, height);
-				glViewport(0, 0, width, height);
 			}
 			break;
 		}
@@ -100,7 +104,7 @@ GLXwindow::GLXwindow(): callback([](int w, int h){}){
 		throw std::runtime_error("Outdated GLX version!");
 	}
 
-	glx_exts = glXQueryExtensionsString(display, DefaultScreen(display));
+	std::string glx_exts = glXQueryExtensionsString(display, DefaultScreen(display));
 	bool arb_create_context = hasExt(glx_exts, "GLX_ARB_create_context");
 	if(!arb_create_context){
 		XCloseDisplay(display);
@@ -126,19 +130,25 @@ GLXwindow::GLXwindow(): callback([](int w, int h){}){
 	selectFBConfig(fbconfig, display, visual_attribs);
 
 	// get visual info and create color map
-	Xptr<XVisualInfo> vi(glXGetVisualFromFBConfig(display, fbconfig), (FN_del<XVisualInfo>)XFree);
-	cmap = XCreateColormap(display, RootWindow(display, vi->screen), vi->visual, AllocNone);
+	Xptr<XVisualInfo> vi(glXGetVisualFromFBConfig(display, fbconfig));
+	cmap = XCreateColormap(display, DefaultRootWindow(display), vi->visual, AllocNone);
 
 	XSetWindowAttributes wa;
 	wa.colormap = cmap;
-	wa.background_pixmap = None;
+	//wa.background_pixmap = None;
 	wa.border_pixel = 0;
 	wa.event_mask = ExposureMask;
 
 	// open Xwindow
 	width = 640;
 	height = 480;
-	win = XCreateWindow(display, RootWindow(display, vi->screen), 0, 0, width, height, 0, vi->depth, InputOutput, vi->visual, CWBorderPixel|CWBackPixmap|CWColormap|CWEventMask, &wa);
+	win = XCreateWindow(display, DefaultRootWindow(display),
+		0, 0, width, height,
+		0,
+		vi->depth,
+		InputOutput,
+		vi->visual,
+		CWBorderPixel/*|CWBackPixmap*/|CWColormap|CWEventMask, &wa);
 
 	// load context creation function
 	glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)glXGetProcAddressARB((const GLubyte *)"glXCreateContextAttribsARB");
