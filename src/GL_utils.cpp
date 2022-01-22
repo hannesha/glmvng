@@ -1,7 +1,6 @@
 #include "GL_utils.hpp"
 #include <system_error>
 #include <string>
-#include <vector>
 #include <iostream>
 
 using namespace GL;
@@ -25,10 +24,9 @@ void Program::check_link_status() {
 		GLint length;
 		glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
 
-		std::vector<GLchar> log(length);
-		glGetProgramInfoLog(id, length, &length, log.data());
+		std::string err(length, ' ');
+		glGetProgramInfoLog(id, err.size(), &length, err.data());
 
-		std::string err(log.begin(), log.end());
 		throw std::invalid_argument(err);
 	}
 }
@@ -50,12 +48,11 @@ Shader::Shader(const char* code, GLuint type) {
 		GLint length;
 		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 
-		std::vector<GLchar> log(length);
-		glGetShaderInfoLog(id, length, &length, log.data());
+		std::string err(length, ' ');
+		glGetShaderInfoLog(id, err.size(), &length, err.data());
 
-		std::string err(log.begin(), log.end());
 		err = "Shader Error: " + err;
-		//std::cout << err << std::endl;
+
 		throw std::invalid_argument(err);
 	}
 }
