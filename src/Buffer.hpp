@@ -22,8 +22,8 @@
 #include <vector>
 #include <cstdint>
 #include <shared_mutex>
+#include <mutex>
 #include <memory>
-
 
 template<typename T>
 class Buffer {
