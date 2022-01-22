@@ -27,17 +27,17 @@
 
 #include <filesystem>
 
-using std::filesystem::path;
-using std::filesystem::exists;
-using std::string;
+using namespace std;
+using filesystem::path;
+using filesystem::exists;
 
-constexpr char* xdg_config_dirs_default = "/etc/xdg";
+constexpr string_view xdg_config_dirs_default = "/etc/xdg";
 
 namespace xdg{
 	path default_config_home(){
-		std::string config_home;
+		string config_home;
 		// get default config directory
-		const char* env_home = std::getenv("HOME");
+		const char* env_home = getenv("HOME");
 		if(env_home != nullptr){
 			config_home = env_home;
 		}else{
@@ -55,7 +55,7 @@ namespace xdg{
 
 	path config_home(){
 		path config_home;
-		const char* cxdg_cfg_home = std::getenv("XDG_CONFIG_HOME");
+		const char* cxdg_cfg_home = getenv("XDG_CONFIG_HOME");
 		if(cxdg_cfg_home != nullptr){
 			config_home = cxdg_cfg_home;
 		}
@@ -66,21 +66,21 @@ namespace xdg{
 		return config_home;
 	}
 
-	std::vector<path> config_dirs(){
-		std::string config_dirs;
+	vector<path> config_dirs(){
+		string config_dirs;
 
-		const char* cxdg_cfg_dirs = std::getenv("XDG_CONFIG_DIRS");
+		const char* cxdg_cfg_dirs = getenv("XDG_CONFIG_DIRS");
 		if(cxdg_cfg_dirs != nullptr)
 			config_dirs = cxdg_cfg_dirs;
 
 		if(config_dirs.empty())
 			config_dirs = xdg_config_dirs_default;
 
-		std::vector<path> dirs;
-		std::istringstream ss(config_dirs);
-		std::string dir;
+		vector<path> dirs;
+		istringstream ss(config_dirs);
+		string dir;
 
-		while(std::getline(ss, dir, ':')){
+		while(getline(ss, dir, ':')){
 			path directory = dir;
 
 			if(directory.is_absolute())
