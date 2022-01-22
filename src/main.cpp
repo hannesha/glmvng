@@ -2,7 +2,8 @@
 #include <string>
 #include <stdexcept>
 
-#include "GLFW.hpp"
+//#include "GLFW.hpp"
+#include "GL_utils.hpp"
 #include "GLXwindow.hpp"
 
 #include "Config.hpp"
@@ -34,16 +35,21 @@ int main(int argc, char *argv[]) {
 	std::signal(SIGINT, sigint_handler);
 	auto window = GLXwindow();
 	//auto window = GLFWWindow();
-	GL::Multisampler multisample(samples, window.getWidth(), window.getHeight());
 	glEnable(GL_MULTISAMPLE);
 	glDisable(GL_FRAMEBUFFER_SRGB);
+	GL::Multisampler multisample(samples, window.getWidth(), window.getHeight());
+
 
 	if(config_file.empty()){
 		window.setTitle("GLMVNG");
 	}else{
 		window.setTitle("GLMVNG: " + config_file);
 	}
-	window.setResizeCallback([&](int w, int h){multisample.resize(samples, w, h);});
+	window.setResizeCallback(
+		[&](int w, int h){
+			glViewport(0, 0, w, h);
+			multisample.resize(samples, w, h);
+		});
 
 	// load extensions
 	GL::init();
@@ -79,7 +85,7 @@ int main(int argc, char *argv[]) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GLDEBUG;
-	
+
 	// init audio stream
 	Input::Ptr input(new Pulse_Async(bufs));
 	input->start_stream(cfg.input);
@@ -95,6 +101,7 @@ int main(int argc, char *argv[]) {
 		// calculate rms
 		float rms = Processing::rms(bufs->bufs[0]);
 		old_rms = old_rms * (1.f - rms_mix) + rms * rms_mix;
+		//std::cout << "rms:" << rms << std::endl;
 		// set rms
 		ShaderConfig::value_type vrms = {"rms", Scalar(old_rms)};
 		for(auto& renderer : renderers){
